@@ -48,7 +48,6 @@ PROVIDE ( _Heap_Limit = __stack - __Main_Stack_Size ) ;
  */
 ENTRY(_start)
 
-
 /* Sections Definitions */
 
 SECTIONS

@@ -48,14 +48,12 @@
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.847744284" name="Cross ARM GNU Assembler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor.1178524932" name="Use preprocessor" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor" value="true" valueType="boolean"/>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths.1403744282" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;../inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc/cmsis&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc/stm32f2-stdperiph&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc/cmsis&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc/stm32f2-stdperiph&quot;"/>
+									<listOptionValue builtIn="false" value="/home/jet/work/thermo/inc"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/system/inc/cmsis&quot;"/>
+									<listOptionValue builtIn="false" value="/home/jet/work/thermo/system/inc/stm32f2-stdperiph"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/eth/inc&quot;"/>
+									<listOptionValue builtIn="false" value="../eth/inc/ipv4"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/system/inc&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs.1465274146" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG"/>
@@ -77,14 +75,12 @@
 							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1614130428" name="Cross ARM C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths.685123909" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;../inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc/cmsis&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc/stm32f2-stdperiph&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc/cmsis&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc/stm32f2-stdperiph&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/system/inc/cmsis&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/system/inc/stm32f2-stdperiph&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/eth/inc&quot;"/>
+									<listOptionValue builtIn="false" value="/home/jet/work/thermo/eth/inc/ipv4"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/system/inc&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1544576820" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG"/>
@@ -106,14 +102,11 @@
 							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.577315797" name="Cross ARM C++ Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.include.paths.1354259825" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;../inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc/cmsis&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc/stm32f2-stdperiph&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc/cmsis&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../system/inc/stm32f2-stdperiph&quot;"/>
+									<listOptionValue builtIn="false" value="/home/jet/work/thermo/inc"/>
+									<listOptionValue builtIn="false" value="/home/jet/work/thermo/system/inc/stm32f2-stdperiph"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/eth/inc&quot;"/>
+									<listOptionValue builtIn="false" value="../eth/inc/ipv4"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/system/inc&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.noexceptions.122595087" name="Do not use exceptions (-fno-exceptions)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.noexceptions" useByScannerDiscovery="true" value="true" valueType="boolean"/>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.nortti.1579777049" name="Do not use RTTI (-fno-rtti)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.nortti" useByScannerDiscovery="true" value="true" valueType="boolean"/>
@@ -184,7 +177,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="eth/src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="system/src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -204,4 +199,5 @@
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>
+	<storageModule moduleId="refreshScope"/>
 </cproject>
