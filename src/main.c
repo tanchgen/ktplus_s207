@@ -59,8 +59,10 @@ int main(void)
   /* Initilaize the LwIP stack */
   LwIP_Init();
 
-  clientInit();
-      
+  cliPrevInit();
+
+  err_t dns_gethostbyname( neth.url, neth.dns, tcpCliInit, &neth);
+
   /* Infinite loop */
   while (1)
   {  

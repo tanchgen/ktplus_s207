@@ -47,28 +47,45 @@
 #define GW2   			0
 #define GW3   			1
 
+#define DNS0	   		77
+#define DNS1   			88
+#define DNS2   			8
+#define DNS3   			8
+
+
 typedef enum {
 	NET_OK,
-	NET_CONNCET,
-	NET_CONNCTED,
-	NET_TOUT,
-	NET_CLOSED
-} tNetStatus;
+	NAME_RESOLVING,
+	NAME_RESOLVED,
+	NAME_NOT_RESOLVED,
+	TCP_CONNECT,
+	TCP_CONNECTED,
+	TIMEOUT,
+	TCP_CLOSED
+} tNetState;
 
 typedef struct {
 	struct tcp_pcb *pcb;
-	uint8_t * Url;
+	uint8_t * url;
 	uint32_t destIp;
 	uint16_t destPort;
 	uint32_t gw;
 	uint32_t netmask;
 	uint32_t localIp;
-	uint16_t	localPort;
-	tNetStatus netStatus;
+	uint16_t localPort;
+	uint32_t dns;
+	uint8_t txe;
+	uint8_t rxne;
+	tNetState netState;
+	uint8_t connTout;
 
 } tNeth;
 
-
-int8_t  clientInit( void );
+err_t cliPrevInit( void );
+err_t tcpCliInit( void );
+void dnsStart( void );
+void serverFound(const char *name, struct ip_addr *ipaddr, void *arg );
+void cliProcess( void );
+err_t tcpConnected( void * arg, struct tcp_pcb * tpcb, err_t err );
 
 #endif /* INIT_H_ */
