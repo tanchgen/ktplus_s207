@@ -5,18 +5,21 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../src/_write.c \
+../src/buffer.c \
 ../src/main.c \
 ../src/my_cli.c \
 ../src/stm32f2xx_it.c 
 
 OBJS += \
 ./src/_write.o \
+./src/buffer.o \
 ./src/main.o \
 ./src/my_cli.o \
 ./src/stm32f2xx_it.o 
 
 C_DEPS += \
 ./src/_write.d \
+./src/buffer.d \
 ./src/main.d \
 ./src/my_cli.d \
 ./src/stm32f2xx_it.d 

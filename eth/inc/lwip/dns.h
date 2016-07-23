@@ -35,6 +35,8 @@
 #define __LWIP_DNS_H__
 
 #include "lwip/opt.h"
+#include "lwip/err.h"
+#include "lwip/ip_addr.h"
 
 #if LWIP_DNS /* don't build if not configured for use in lwipopts.h */
 

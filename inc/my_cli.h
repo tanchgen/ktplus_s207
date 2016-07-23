@@ -11,6 +11,7 @@
 #include "stdint.h"
 #include "lwip/tcp.h"
 #include "lwip/ip_addr.h"
+#include "buffer.h"
 
 
 #define SERVER_TCP_PRIO 		1
@@ -52,6 +53,14 @@
 #define DNS2   			8
 #define DNS3   			8
 
+#define RX_BUF_SIZE	512
+#define TX_BUF_SIZE 512
+
+#define TMPBUF_SIZE 256
+
+#define CLI_MAX_RETRIES	4
+
+#define CLI_POLL_INTERVAL 1
 
 typedef enum {
 	NET_OK,
@@ -64,6 +73,8 @@ typedef enum {
 	TCP_CLOSED
 } tNetState;
 
+
+
 typedef struct {
 	struct tcp_pcb *pcb;
 	uint8_t * url;
@@ -74,11 +85,16 @@ typedef struct {
 	uint32_t localIp;
 	uint16_t localPort;
 	uint32_t dns;
+	uint8_t txTmpBuf[TMPBUF_SIZE];
+	uint8_t txLen;
 	uint8_t txe;
+	uint8_t retr;
+	uint8_t rxTmpBuf[TMPBUF_SIZE];
 	uint8_t rxne;
-	tNetState netState;
 	uint8_t connTout;
-
+	BUFFER_t rxBuf;
+	BUFFER_t txBuf;
+	tNetState netState;
 } tNeth;
 
 err_t cliPrevInit( void );
@@ -87,5 +103,12 @@ void dnsStart( void );
 void serverFound(const char *name, struct ip_addr *ipaddr, void *arg );
 void cliProcess( void );
 err_t tcpConnected( void * arg, struct tcp_pcb * tpcb, err_t err );
+uint8_t sendMess( tNeth * eh );
+err_t tcpRecv( void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err);
+err_t tcpSent( void *arg, struct tcp_pcb *tpcb,  u16_t len);
+err_t tcpPoll(void *arg, struct tcp_pcb *tpcb);
+uint8_t sendMess( tNeth * eh );
+void tcpCloseConn(struct tcp_pcb *pcb, tNeth *eh);
+void tcpErr(void *arg, err_t err);
 
 #endif /* INIT_H_ */

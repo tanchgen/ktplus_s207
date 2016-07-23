@@ -31,6 +31,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f2xx.h"
 #include "stm32f2x7_eth_bsp.h"
+#include "my_err.h"
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
@@ -67,11 +68,13 @@ enum {
 
 #endif
 
+
 /* Exported macro ------------------------------------------------------------*/
+#define UNUSED(x)		(void)(x)
 /* Exported functions ------------------------------------------------------- */  
 void Time_Update(void);
 void Delay(uint32_t nCount);
-
+void genericError( tGenErr err);
 
 #ifdef __cplusplus
 }

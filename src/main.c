@@ -61,7 +61,7 @@ int main(void)
 
   cliPrevInit();
 
-  err_t dns_gethostbyname( neth.url, neth.dns, tcpCliInit, &neth);
+  dnsStart();
 
   /* Infinite loop */
   while (1)
@@ -90,8 +90,8 @@ void systickConfig(void) {
 
 }
 /**
-  * @brief  Inserts a delay time.
   * @param  nCount: number of 10ms periods to wait for.
+  * @brief  Inserts a delay time.
   * @retval None
   */
 void Delay(uint32_t nCount)
@@ -103,6 +103,24 @@ void Delay(uint32_t nCount)
   while(timingdelay > LocalTime)
   {     
   }
+}
+
+void genericError( tGenErr err){
+	switch ( err ) {
+		case GEN_ERR_OK:
+			return;
+		case GEN_ERR_MEM:
+			while(1)
+			{}
+			break;
+		case GEN_ERR_HW:
+			while(1)
+			{}
+			break;
+		default:
+			Delay(5000);
+			NVIC_SystemReset();
+	}
 }
 
 /**
