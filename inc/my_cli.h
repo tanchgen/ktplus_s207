@@ -16,8 +16,8 @@
 
 #define SERVER_TCP_PRIO 		1
 #define CLIENT_TCP_PRIO 		2
-#define LOCAL_PORT		63180
-#define DEST_PORT		63194
+#define LOCAL_PORT					63180
+#define MQTT_PORT						1883
 
 #define CONN_TIMEOUT				10000				// Таймаут для установки соединения
 
@@ -35,6 +35,13 @@
 #define LOCAL_IP1  	168
 #define LOCAL_IP2  	0
 #define LOCAL_IP3 	10
+
+#define DEST_IP0		213
+#define DEST_IP1		180
+#define DEST_IP2		193
+#define DEST_IP3		3
+
+#define DEST_PORT		80
 
 /*NETMASK*/
 #define NETMASK0	  255
@@ -67,8 +74,8 @@ typedef enum {
 	NAME_RESOLVING,
 	NAME_RESOLVED,
 	NAME_NOT_RESOLVED,
-	TCP_CONNECT,
-	TCP_CONNECTED,
+	MQTT_CONNECT,
+	MQTT_CONNECTED,
 	TIMEOUT,
 	TCP_CLOSED
 } tNetState;
@@ -77,6 +84,7 @@ typedef enum {
 
 typedef struct {
 	struct tcp_pcb *pcb;
+	// Установки TCP
 	uint8_t * url;
 	uint32_t destIp;
 	uint16_t destPort;
@@ -84,18 +92,27 @@ typedef struct {
 	uint32_t netmask;
 	uint32_t localIp;
 	uint16_t localPort;
-	uint32_t dns;
-	uint8_t txTmpBuf[TMPBUF_SIZE];
-	uint8_t txLen;
-	uint8_t txe;
-	uint8_t retr;
-	uint8_t rxTmpBuf[TMPBUF_SIZE];
-	uint8_t rxne;
+	uint32_t dns;					// IP-адрес DNS-сервера
+// Передающий буфер
+	uint8_t txTmpBuf[TMPBUF_SIZE];		// Временный буфер передающего буфера (О!)
+	uint8_t txLen;										// Размер
+	uint8_t txe;											// Временный буфер приема занят данными
+	BUFFER_t txBuf;										// Структура приемного буфера
+	uint8_t retr;											// Количество попыток передать данные
+
+// Приемный буфер
+	uint8_t rxTmpBuf[TMPBUF_SIZE];		// Временный буфер приемного буфера (О!)
+	uint8_t rxne;											// Временный буфер приема НЕ пуст
+	BUFFER_t rxBuf;										// Структура приемного буфера
+	struct pbuf	* rxPbuf;							// Указатель на начальный PBUF приема
+	uint16_t pbufOffset;							// Сдвиг в цепочке PBUF до начала неперенесенных в rxTmpBuf данных
+
 	uint8_t connTout;
-	BUFFER_t rxBuf;
-	BUFFER_t txBuf;
 	tNetState netState;
 } tNeth;
+
+
+extern tNeth neth;
 
 err_t cliPrevInit( void );
 err_t tcpCliInit( void );

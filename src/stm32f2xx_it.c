@@ -24,6 +24,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f2xx_it.h"
 #include "main.h"
+#include "my_time.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -133,6 +134,7 @@ void SysTick_Handler(void)
 {
   /* Update the LocalTime by adding SYSTEMTICK_PERIOD_MS each SysTick interrupt */
   Time_Update();
+  myTick++;
 }
 
 /**

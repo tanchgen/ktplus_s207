@@ -144,6 +144,7 @@ void LwIP_Pkt_Handle(void)
   */
 void LwIP_Periodic_Handle(__IO uint32_t localtime)
 {
+	sys_check_timeouts();
 #if LWIP_TCP
   /* TCP periodic process every 250 ms */
   if (localtime - TCPTimer >= TCP_TMR_INTERVAL)

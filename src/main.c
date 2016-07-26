@@ -35,8 +35,8 @@
 __IO uint32_t LocalTime = 0; /* this variable is used to create a time reference incremented by 10ms */
 uint32_t timingdelay;
 
+//void lwip_init( void );
 /* Private function prototypes -----------------------------------------------*/
-
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -58,14 +58,14 @@ int main(void)
     
   /* Initilaize the LwIP stack */
   LwIP_Init();
-
+//  lwip_init();
   cliPrevInit();
-
   dnsStart();
 
   /* Infinite loop */
   while (1)
   {  
+  	cliProcess();
     /* check if any packet received */
     if (ETH_CheckFrameReceived())
     { 
@@ -114,6 +114,10 @@ void genericError( tGenErr err){
 			{}
 			break;
 		case GEN_ERR_HW:
+			while(1)
+			{}
+			break;
+		case GEN_ERR_TCP:
 			while(1)
 			{}
 			break;

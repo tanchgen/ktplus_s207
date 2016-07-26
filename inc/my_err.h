@@ -11,7 +11,8 @@
 typedef enum {
 	GEN_ERR_OK,
 	GEN_ERR_MEM,
-	GEN_ERR_HW
+	GEN_ERR_HW,
+	GEN_ERR_TCP
 }tGenErr;
 
 

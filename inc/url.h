@@ -8,8 +8,9 @@
 #ifndef URL_H_
 #define URL_H_
 
-#define URL "tangens.ddns.net"
+// #define URL "tangens.ddns.net"
 
+#define URL "monteks-s.ru"
 
 
 #endif /* URL_H_ */

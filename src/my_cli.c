@@ -8,8 +8,11 @@
 
 #include "main.h"
 #include "lwip/dns.h"
+#include "sntp.h"
 #include "string.h"
 #include "url.h"
+#include "mqtt.h"
+#include "mqttApp.h"
 #include "my_cli.h"
 
 tNeth neth;
@@ -22,7 +25,7 @@ err_t cliPrevInit( void ) {
 	memset( &neth, 0, sizeof(neth));
 	neth.netState = TCP_CLOSED;
 	neth.url = (uint8_t *)&URL;
-	neth.destPort = DEST_PORT;
+	neth.destPort = MQTT_PORT;
 	neth.localIp = ((LOCAL_IP0) | (LOCAL_IP1<< 8) | (LOCAL_IP2 << 16) | (LOCAL_IP3 << 24 ));
 	neth.localPort = LOCAL_PORT;
 	neth.gw = (GW0 | (GW1 << 8) | (GW2 << 16) | (GW3 << 24 ));
@@ -36,7 +39,7 @@ err_t cliPrevInit( void ) {
 	if ( BUFFER_Init(&neth.txBuf, TX_BUF_SIZE, txBuffer)){
 		genericError( GEN_ERR_MEM );
 	}
-
+	sys_timeouts_init();
 	return ERR_OK;
 }
 
@@ -56,6 +59,12 @@ err_t tcpCliInit( void ) {
 	tcp_arg( pcb, &neth );
 	neth.pcb = pcb;
 	tcp_err( pcb, tcpErr);
+
+  // initialize LwIP tcp_recv callback function
+  tcp_recv(pcb, tcpRecv);
+
+  // initialize LwIP tcp_sent callback function
+  tcp_sent(pcb, tcpSent);
 
 	return ERR_OK;
 }
@@ -86,6 +95,7 @@ void serverFound(const char *name, struct ip_addr *ipaddr, void *arg)
 	UNUSED(name);
   if ((ipaddr) && (ipaddr->addr))
   {
+  	neth.destIp = ipaddr->addr;
     neth.netState = NAME_RESOLVED;
   }
   else
@@ -103,16 +113,14 @@ void cliProcess( void ) {
 			dnsStart();
 			break;
 		case NAME_RESOLVED:
-			tcpCliInit();
-			tcp_connect( neth.pcb, (ip_addr_t *)&neth.destIp, neth.destPort, tcpConnected );
-			neth.netState = TCP_CONNECT;
+			sntp_init();
+			mqttAppInit();
+			mqttConnect( &mqtt );
+			neth.netState = MQTT_CONNECT;
 			break;
-		case TCP_CONNECT:
+		case MQTT_CONNECT:
 			break;
-		case TCP_CONNECTED:
-			if( sendMess( &neth ) ) {
-				tcp_output( neth.pcb );
-			}
+		case MQTT_CONNECTED:
 			break;
 		case TCP_CLOSED:
 			neth.netState = NAME_RESOLVED;
@@ -135,12 +143,6 @@ err_t tcpConnected( void * arg, struct tcp_pcb * tpcb, err_t err ){
   	// TODO: Инициализация Буфера приема и передачи
 
 
-      // initialize LwIP tcp_recv callback function
-      tcp_recv(tpcb, tcpRecv);
-
-      // initialize LwIP tcp_sent callback function
-      tcp_sent(tpcb, tcpSent);
-
       // initialize LwIP tcp_poll callback function
       tcp_poll(tpcb, tcpPoll, 1);
 
@@ -148,7 +150,7 @@ err_t tcpConnected( void * arg, struct tcp_pcb * tpcb, err_t err ){
 
       neth.txLen = 0;
       neth.rxne = FALSE;
-      neth.netState = TCP_CONNECTED;
+      neth.netState = MQTT_CONNECTED;
     	eh->pcb = tpcb;
 
     	return ERR_OK;
@@ -189,6 +191,9 @@ err_t tcpRecv( void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err) {
   		}
   		if( i >= p->tot_len ){
   			pbuf_free( p );
+  		}
+  		else {
+
   		}
     	eh->rxne = TRUE;
     	return ERR_OK;
@@ -273,12 +278,13 @@ err_t tcpPoll(void *arg, struct tcp_pcb *tpcb) {
  */
 uint8_t sendMess( tNeth * eh ){
 
-	// Проверяем - есть ли взятое из Буфера отправки сообдение и не отправленное
-	if( ! eh->txe) {
+	// Проверяем - есть ли взятое из Буфера отправки сообщение и не отправленное
+	if( eh->txe) {
 		// Перекачиваем данные из Буфера отправки во временный буфер
 		eh->txLen = BUFFER_ReadString( &(eh->txBuf), (char *)eh->txTmpBuf, TMPBUF_SIZE );
 		if( eh->txLen ) {
-			eh->txLen = FALSE;
+			eh->txe = FALSE;
+			eh->retr = 0;
 			// Есть сообщение для отправки
 			if( tcp_sndbuf( eh->pcb ) < eh->txLen ) {
 				// Длина сообщения больше места в буфере передачи стека
@@ -320,6 +326,7 @@ void tcpCloseConn(struct tcp_pcb *pcb, tNeth *eh) {
   }
   else {
   	eh->pcb = NULL;
+  	eh->netState = TCP_CLOSED;
   }
 }
 
