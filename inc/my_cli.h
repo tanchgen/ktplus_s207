@@ -93,12 +93,13 @@ typedef struct {
 	uint32_t localIp;
 	uint16_t localPort;
 	uint32_t dns;					// IP-адрес DNS-сервера
-// Передающий буфер
+	uint8_t retr;											// Количество попыток передать данные
+/*
+	// Передающий буфер
 	uint8_t txTmpBuf[TMPBUF_SIZE];		// Временный буфер передающего буфера (О!)
 	uint8_t txLen;										// Размер
 	uint8_t txe;											// Временный буфер приема занят данными
 	BUFFER_t txBuf;										// Структура приемного буфера
-	uint8_t retr;											// Количество попыток передать данные
 
 // Приемный буфер
 	uint8_t rxTmpBuf[TMPBUF_SIZE];		// Временный буфер приемного буфера (О!)
@@ -106,7 +107,7 @@ typedef struct {
 	BUFFER_t rxBuf;										// Структура приемного буфера
 	struct pbuf	* rxPbuf;							// Указатель на начальный PBUF приема
 	uint16_t pbufOffset;							// Сдвиг в цепочке PBUF до начала неперенесенных в rxTmpBuf данных
-
+*/
 	uint8_t connTout;
 	tNetState netState;
 } tNeth;

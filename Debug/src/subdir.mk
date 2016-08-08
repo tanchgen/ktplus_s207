@@ -6,9 +6,11 @@
 C_SRCS += \
 ../src/_write.c \
 ../src/buffer.c \
+../src/fmt_translate.c \
 ../src/main.c \
 ../src/mqtt.c \
 ../src/mqttApp.c \
+../src/mqtt_codec.c \
 ../src/my_cli.c \
 ../src/stm32f2xx_it.c \
 ../src/tcp_echoclient.c \
@@ -17,9 +19,11 @@ C_SRCS += \
 OBJS += \
 ./src/_write.o \
 ./src/buffer.o \
+./src/fmt_translate.o \
 ./src/main.o \
 ./src/mqtt.o \
 ./src/mqttApp.o \
+./src/mqtt_codec.o \
 ./src/my_cli.o \
 ./src/stm32f2xx_it.o \
 ./src/tcp_echoclient.o \
@@ -28,9 +32,11 @@ OBJS += \
 C_DEPS += \
 ./src/_write.d \
 ./src/buffer.d \
+./src/fmt_translate.d \
 ./src/main.d \
 ./src/mqtt.d \
 ./src/mqttApp.d \
+./src/mqtt_codec.d \
 ./src/my_cli.d \
 ./src/stm32f2xx_it.d \
 ./src/tcp_echoclient.d \

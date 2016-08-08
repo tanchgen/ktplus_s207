@@ -75,14 +75,16 @@ err_t recv_callback(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
 err_t accept_callback(void *arg, struct tcp_pcb *npcb, err_t err) {
 	LWIP_UNUSED_ARG(err);
   LWIP_UNUSED_ARG(arg);
-	//Mqtt *this = arg;
+	Mqtt *this = arg;
 
     //flag++;
 
     // UARTprintf("Recieve from broker.\n");
     //UARTprintf("\r\n");
 
-	//this->connected = 1;
+	this->connected = 1;
+
+	neth.netState = MQTT_CONNECTED;
 
     /* Subscribe a receive callback function */
     tcp_recv(npcb, recv_callback);
@@ -102,6 +104,8 @@ void mqttDisconnectForced(Mqtt *this)
 	tcp_abort(this->pcb);
 
 	this->connected = 0;
+	neth.netState = NAME_RESOLVED;
+
 }
 
 
@@ -121,7 +125,7 @@ static void
 conn_err(void *arg, err_t err)
 {
 
-
+  LWIP_UNUSED_ARG(arg);
   LWIP_UNUSED_ARG(err);
 
 //  UARTprintf("conn_err\n");
@@ -242,7 +246,7 @@ uint8_t mqttConnect(Mqtt *this) {
 }
 
 
-uint8_t mqttPublish(Mqtt *this,char* pub_topic, char* msg) {
+uint8_t mqttPublish(Mqtt *this, char* pub_topic, char* msg) {
 
 	if(!this->connected)
 	{
@@ -313,6 +317,8 @@ uint8_t mqttDisconnect(Mqtt *this) {
     tcp_close(this->pcb);
     //this->lastActivity = timer.read_ms();
     this->connected = 0;
+		neth.netState = NAME_RESOLVED;
+
 
     return 0;
 }
@@ -397,6 +403,8 @@ uint8_t mqttLive(Mqtt *this) {
 			mqttPing(this);
 		} else if(this->autoConnect){
 			mqttConnect(this);
+		} else {
+			neth.netState = NAME_RESOLVED;
 		}
 
 		this->lastActivity = t;

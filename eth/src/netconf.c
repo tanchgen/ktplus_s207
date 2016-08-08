@@ -27,6 +27,7 @@
 #include "lwip/tcp.h"
 #include "lwip/tcp_impl.h"
 #include "lwip/udp.h"
+#include "lwip/timers.h"
 #include "netif/etharp.h"
 #include "lwip/dhcp.h"
 #include "ethernetif.h"
