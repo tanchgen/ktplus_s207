@@ -48,6 +48,8 @@ struct Mqtt
 	uint32_t lastActivity;
 	msgReceived msgReceivedCallback;
 	char deviceId[9];
+	char username[80];
+	char password[42];
 	uint8_t pollAbortCounter;
 };
 

@@ -9418,8 +9418,8 @@ END GROUP
                 0x0800c83c       0x31 ./src/mqtt_codec.o
  *fill*         0x0800c86d        0x3 
  .rodata.str1.4
-                0x0800c870        0xd ./src/my_cli.o
- *fill*         0x0800c87d        0x3 
+                0x0800c870        0xe ./src/my_cli.o
+ *fill*         0x0800c87e        0x2 
  .rodata.lmos   0x0800c880       0x18 ./src/time.o
                 0x0800c880                lmos
  .rodata.mos    0x0800c898       0x18 ./src/time.o
@@ -10368,7 +10368,7 @@ END GROUP
  .debug_frame   0x00003c70       0x34 /home/jet/programm/stm32/gcc-arm-none-eabi-4_9-2015q3/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_divdi3.o)
  .debug_frame   0x00003ca4       0x34 /home/jet/programm/stm32/gcc-arm-none-eabi-4_9-2015q3/bin/../lib/gcc/arm-none-eabi/4.9.3/armv7-m/libgcc.a(_udivdi3.o)
 
-.debug_str      0x00000000    0x710ae
+.debug_str      0x00000000    0x710af
  *(.debug_str)
  .debug_str     0x00000000    0x548fe ./system/src/stm32f2-stdperiph/misc.o
                               0x54aa3 (size before relaxing)
@@ -10414,57 +10414,57 @@ END GROUP
                               0x5cddd (size before relaxing)
  .debug_str     0x0006adba      0x187 ./src/mqtt_codec.o
                               0x579b0 (size before relaxing)
- .debug_str     0x0006af41       0xff ./src/my_cli.o
-                              0x5cd8c (size before relaxing)
- .debug_str     0x0006b040       0x53 ./src/stm32f2xx_it.o
+ .debug_str     0x0006af41      0x100 ./src/my_cli.o
+                              0x5cd8d (size before relaxing)
+ .debug_str     0x0006b041       0x53 ./src/stm32f2xx_it.o
                               0x57712 (size before relaxing)
- .debug_str     0x0006b093      0x16c ./src/time.o
+ .debug_str     0x0006b094      0x16c ./src/time.o
                               0x57917 (size before relaxing)
- .debug_str     0x0006b1ff     0x1006 ./eth/src/core/ipv4/icmp.o
+ .debug_str     0x0006b200     0x1006 ./eth/src/core/ipv4/icmp.o
                                0x987b (size before relaxing)
- .debug_str     0x0006c205       0xcb ./eth/src/core/ipv4/inet_chksum.o
+ .debug_str     0x0006c206       0xcb ./eth/src/core/ipv4/inet_chksum.o
                                0x7a40 (size before relaxing)
- .debug_str     0x0006c2d0     0x12f8 ./eth/src/core/ipv4/ip.o
+ .debug_str     0x0006c2d1     0x12f8 ./eth/src/core/ipv4/ip.o
                                0xb5de (size before relaxing)
- .debug_str     0x0006d5c8      0x1ea ./eth/src/core/ipv4/ip_addr.o
+ .debug_str     0x0006d5c9      0x1ea ./eth/src/core/ipv4/ip_addr.o
                                0x5759 (size before relaxing)
- .debug_str     0x0006d7b2      0x465 ./eth/src/core/ipv4/ip_frag.o
+ .debug_str     0x0006d7b3      0x465 ./eth/src/core/ipv4/ip_frag.o
                                0x9bc7 (size before relaxing)
- .debug_str     0x0006dc17       0x21 ./eth/src/core/def.o
+ .debug_str     0x0006dc18       0x21 ./eth/src/core/def.o
                                0x4467 (size before relaxing)
- .debug_str     0x0006dc38      0x433 ./eth/src/core/dns.o
+ .debug_str     0x0006dc39      0x433 ./eth/src/core/dns.o
                                0x8bd5 (size before relaxing)
- .debug_str     0x0006e06b      0x22c ./eth/src/core/mem.o
+ .debug_str     0x0006e06c      0x22c ./eth/src/core/mem.o
                                0x7868 (size before relaxing)
- .debug_str     0x0006e297      0x1ad ./eth/src/core/memp.o
+ .debug_str     0x0006e298      0x1ad ./eth/src/core/memp.o
                                0xb63c (size before relaxing)
- .debug_str     0x0006e444      0x1b7 ./eth/src/core/netif.o
+ .debug_str     0x0006e445      0x1b7 ./eth/src/core/netif.o
                                0x8b56 (size before relaxing)
- .debug_str     0x0006e5fb      0x1ef ./eth/src/core/pbuf.o
+ .debug_str     0x0006e5fc      0x1ef ./eth/src/core/pbuf.o
                                0x7bc4 (size before relaxing)
- .debug_str     0x0006e7ea       0x93 ./eth/src/core/raw.o
+ .debug_str     0x0006e7eb       0x93 ./eth/src/core/raw.o
                                0x8a46 (size before relaxing)
- .debug_str     0x0006e87d      0x4af ./eth/src/core/tcp.o
+ .debug_str     0x0006e87e      0x4af ./eth/src/core/tcp.o
                                0xb379 (size before relaxing)
- .debug_str     0x0006ed2c      0x12c ./eth/src/core/tcp_in.o
+ .debug_str     0x0006ed2d      0x12c ./eth/src/core/tcp_in.o
                                0x8bf7 (size before relaxing)
- .debug_str     0x0006ee58      0x1c1 ./eth/src/core/tcp_out.o
+ .debug_str     0x0006ee59      0x1c1 ./eth/src/core/tcp_out.o
                                0xb211 (size before relaxing)
- .debug_str     0x0006f019      0x113 ./eth/src/core/timers.o
+ .debug_str     0x0006f01a      0x113 ./eth/src/core/timers.o
                                0x8a60 (size before relaxing)
- .debug_str     0x0006f12c      0x15a ./eth/src/core/udp.o
+ .debug_str     0x0006f12d      0x15a ./eth/src/core/udp.o
                                0xa26e (size before relaxing)
- .debug_str     0x0006f286      0x413 ./eth/src/etharp.o
+ .debug_str     0x0006f287      0x413 ./eth/src/etharp.o
                                0xa39a (size before relaxing)
- .debug_str     0x0006f699      0x461 ./eth/src/ethernetif.o
+ .debug_str     0x0006f69a      0x461 ./eth/src/ethernetif.o
                               0x63489 (size before relaxing)
- .debug_str     0x0006fafa       0x58 ./eth/src/netconf.o
+ .debug_str     0x0006fafb       0x58 ./eth/src/netconf.o
                               0x5d8b9 (size before relaxing)
- .debug_str     0x0006fb52      0x6fb ./eth/src/sntp.o
+ .debug_str     0x0006fb53      0x6fb ./eth/src/sntp.o
                               0x5b4d6 (size before relaxing)
- .debug_str     0x0007024d      0xd90 ./eth/src/stm32f2x7_eth.o
+ .debug_str     0x0007024e      0xd90 ./eth/src/stm32f2x7_eth.o
                               0x6002d (size before relaxing)
- .debug_str     0x00070fdd       0xd1 ./eth/src/stm32f2x7_eth_bsp.o
+ .debug_str     0x00070fde       0xd1 ./eth/src/stm32f2x7_eth_bsp.o
                               0x60b5a (size before relaxing)
 
 .debug_loc      0x00000000     0xd83c

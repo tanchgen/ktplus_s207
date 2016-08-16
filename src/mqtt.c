@@ -212,9 +212,20 @@ uint8_t mqttConnect(Mqtt *this) {
     uint8_t var_header[] = {0x00,0x06,0x4d,0x51,0x49,0x73,0x64,0x70,0x03,0x02,0x00,KEEPALIVE/1000,0x00,strlen(this->deviceId)};
 
     // fixed header: 2 bytes, big endian
-    uint8_t fixed_header[] = {MQTTCONNECT,12+strlen(this->deviceId)+2};
+    uint8_t fixed_header[] = {MQTTCONNECT,0};
 
     char packet[sizeof(fixed_header)+sizeof(var_header)+strlen(this->deviceId)];
+
+    uint8_t len,l;
+
+    len = 12+strlen(this->deviceId)+2;
+    if ((l=strlen(this->username))){
+    	len += l+2;
+    }
+    if ((l=strlen(this->username))){
+    	len += l+2;
+    }
+    fixed_header[1] = len;
 
     // Clear memory
     memset(packet,0,sizeof(packet));
