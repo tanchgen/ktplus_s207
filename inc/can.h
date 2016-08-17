@@ -8,7 +8,6 @@
 #ifndef CAN_H_
 #define CAN_H_
 
-#include <stdint.h>
 #include "stm32f2xx_conf.h"
 
 #define CAN_RX_PIN 						GPIO_Pin_8
@@ -36,20 +35,30 @@
 #define CAN_SCE_NVIC_IRQHANDLER 			CAN1_SCE_IRQHandler
 */
 
-
-#define CAN_RX_MESSAGE_LEN		sizeof(CanRxMsg)
+#define CAN_RX_MESSAGE_LEN		sizeof(tCanMessage)
 #define CAN_RX_BUFFER_SIZE 		16
 #define CAN_TX_BUFFER_SIZE 		4
-#define CAN_TX_MESSAGE_LEN		sizeof(CanTxMsg)
+#define CAN_TX_MESSAGE_LEN		sizeof(tCanMessage)
+
+typedef struct CanMessageStruct
+{
+  uint32_t StdId;
+  uint32_t ExtId;
+  uint8_t IDE;
+  uint8_t RTR;
+  uint8_t DLC;
+  uint8_t Data[8];
+	uint8_t FMI;
+} tCanMessage;
 
 #define CUR_ADJ_MASK		(uint32_t)0x10000000
-#define MSG_ID_MASK		(uint32_t)0x0FC00000
+#define MSG_ID_MASK			(uint32_t)0x0FC00000
 #define COLD_HOT_MASK		(uint32_t)0x00200000
 #define S207_MASK				(uint32_t)0x00100000
 #define DEV_ID_MASK			(uint32_t)0x000FFFFF
 
-#define S207_DEV				(uint32_t)0x100000				// Поле признака S207-устройства
-
+#define S207_DEV				(uint8_t)0x1				// Поле признака S207-устройства
+#define nS207_DEV				(uint8_t)0x0				// Поле признака НЕ-S207 - устройство
 
 typedef struct {
 	uint8_t adjCur;		// Действующее-задаваемое
@@ -75,8 +84,7 @@ typedef enum {				// Действующее-Задаваемое
 
 typedef enum {							// Условный номер сообщения
 	NULL_MES = 0,
-	TIME = 1,									// Дата-Время
-	TO_IN,										// Входящая температура
+	TO_IN = 1,								// Входящая температура
 	TO_OUT,										// Выходящая температура
 	VALVE_DEG,								// Угол поворота задвижки
 	FLOW,											// Значение потока - показания расходомера
@@ -84,6 +92,7 @@ typedef enum {							// Условный номер сообщения
 	POWER_DAY,								// Тепловая работа в сутки
 	POWER_WEEK,								// Тепловая работа в неделю
 	POWER_MON,								// Тепловая работа в месяц
+	TIME,											// Дата-Время
 	DEG0_FAULT = 0x21,				// Неисправность концевого датчика 0гр.
 	DEG90_FAULT,							// Неисправность концевого датчика 90гр.
 	VALVE_SENS_FAULT,					// Неисправность датчика положения задвижки
@@ -112,8 +121,8 @@ typedef struct {			// Структура CAN-сообщения
 	uint32_t devId;			// Идентификационный номер контроллера ( Serial ID MCU )
 } tIdStruct;
 
-uint8_t CAN_ReceiveMessage(CanRxMsg *RxMessage);
-uint8_t CAN_TransmitMessage(CanTxMsg *TxMessage);
+uint8_t CAN_ReceiveMessage(tCanMessage *RxMessage);
+uint8_t CAN_TransmitMessage(tCanMessage *TxMessage);
 
 
 void canInit( void );
@@ -121,8 +130,12 @@ void canBspInit( void );
 void canFilterInit( void );
 void canFilterUpdate( tFilter * filter );
 
+void canProcess( void );
+
 void canRx0IrqHandler(void);
 void canRx1IrqHandler(void);
 void canTxIrqHandler(void);
 void canSceIrqHandler(void);
+
+uint32_t setIdList( tCanId *canid );
 #endif /* CAN_H_ */

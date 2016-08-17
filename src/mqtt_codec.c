@@ -9,35 +9,92 @@
 #include <stdint.h>
 #include <string.h>
 #include "buffer.h"
-#include "mqtt_codec.h"
-#include "time.h"
-#include "my_time.h"
 #include "fmt_translate.h"
+#include "mqtt_codec.h"
+//#include "time.h"
+#include "my_time.h"
 
 extern uint32_t s207Id;
 
-uint8_t param[10][10] = { "NOT",  "Time", "TempIn", "TempOut", "ValveDeg", "Flow", "PowerSec",
-											"PowerDay", "PowerWeek", "PowerMon" };
-uint8_t error[8][10] = { "Deg0", "Deg90", "ValveSens", "ValveMot", "ToInSens", "ToOutSens",
-											"FlowSens", "Dev" };
+#define PARAM_NB		12
+const struct _param {
+	uint8_t name[10];
+	uint8_t len;
+} param[PARAM_NB] = { {"NOT", 3}, {"TIME", 4}, { "COLD", 4 }, {"HOT", 3},
+						{"TEMPIN", 6}, {"TEMPOUT", 7}, {"VALVEDEG", 8}, {"FLOW", 4},
+						{"POWERSEC", 8}, {"POWERDAY", 8}, {"POWERWEEK", 9}, {"POWERMON", 8} };
+
+uint8_t error[8][12] = { "ENDSW0", "ENDSW90", "VALVESENS", "VALVEMON", "TEMPINSENS", "TEMPOUTSENS",
+											"FLOW", "DEVICE" };
+
+static uint8_t topicParse( uint8_t * top, uint8_t * level, tCanId * canId );
 
 
-int32_t mqttTopDecod( uint32_t *devId, uint8_t *top, uint16_t topLen) {
+uint16_t mqttTopDecod( CanTxMsg *txMsg, uint8_t top[], uint16_t topLen) {
 	uint8_t * pTop = top;
-	uint16_t pos;
+	uint16_t pos,posEnd;
+	tCanId canId;
 
+	canId.msgId = 0;
 	if(*(pTop+topLen-2) == '\n'){
 		topLen--;
 		*(pTop+topLen-1) = '\0';
 	}
-	for( pos = 0; (pos < topLen) && (*pTop != '/'); pTop++, pos++ )
-	{}
-	if( pos == topLen ){
-		return -1;
+	for( pos = 0; top[pos] != '/'; pos++ ){
+		if( pos == topLen ){
+			return 0;
+		}
 	}
-	pTop++;
 	pos++;
-	return hexToL( devId, pTop, topLen-pos );
+	// РАзбираем по уровням топика
+	for( uint8_t level = 1; level < 4; level++){
+		for( posEnd = pos; (top[posEnd] != '/') && (posEnd < topLen); posEnd++ )
+		{}
+		switch (level){
+			case 1:
+				if((canId.devId = hexToL( &top[pos], posEnd-pos )) == 0){
+					return 0;
+				}
+				break;
+			case 2:
+			case 3:
+				if( !topicParse( &top[pos], &level, &canId ) ){
+					return 0;
+				}
+		}
+		pos = posEnd+1;
+		if ( pos >= topLen){
+			break;
+		}
+	}
+	txMsg->ExtId = setIdList( &canId );
+	txMsg->IDE = 1;
+
+	return canId.msgId;
+}
+
+static uint8_t topicParse( uint8_t * top, uint8_t * level, tCanId * canId ){
+	if ( (*level < 2) && (*level >3) ){
+		return 0;
+	}
+	for( uint8_t i=0; i < PARAM_NB; i++ ){
+		if( memcmp( top, param[i].name, param[i].len) == 0 ){
+			if ( i == 1 ){
+				(*level)++;
+			}
+			if (*level == 2){
+				canId->coldHot = i-2;
+				return 1;
+			}
+			else if(*level == 3){
+				canId->msgId = i;
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+
 }
 
 //Temp.Hot :53, Valve.Cold :37, Temp.Cold :15, Time : 1470419778
@@ -48,89 +105,19 @@ int32_t mqttTopDecod( uint32_t *devId, uint8_t *top, uint16_t topLen) {
  *
  * Возвращает количество сформированных CAN-пакетов
  */
-int8_t mqttMsgDecod( uint32_t devId, uint8_t * msg, uint8_t len ){
-	uint8_t * ptr = msg;
-	uint8_t msgNum = 0;
-	CanTxMsg can;
-	tCanId canId;
-	uint8_t pars = 0;
+int8_t mqttMsgDecod( CanTxMsg *can, uint8_t * msg, uint8_t len, eMessId messId ){
 
-	memset( (uint8_t *)&can, 0, sizeof(can));
-	while ( (*ptr != 0) && ( (ptr - msg) < len) ){
-		while( (*ptr == ' ') || (*ptr == '\t') || (*ptr == '\n') ){
-			ptr++;
-		}
-		if( memcmp( ptr, "Temp", 4) == 0 ){
-			canId.msgId = TO_OUT;
-			ptr += 4;
-			pars++;
-		}
-		else if( memcmp( ptr, "Cold", 4) == 0) {
-			canId.coldHot = COLD;
-			ptr += 4;
-			pars++;
-		}
-		else if ( memcmp( ptr, "Hot", 3) == 0) {
-			canId.coldHot = HOT;
-			ptr += 3;
-			pars++;
-		}
-		else if( memcmp( ptr, "Valve", 5) == 0) {
-			canId.msgId = VALVE_DEG;
-			ptr += 5;
-			pars++;
-		}
-		else if( memcmp( ptr, "Time", 4) == 0) {
-			canId.msgId = TIME;
-			canId.coldHot = COLD;
-			ptr += 4;
-			pars += 2;
-		}
-		else {
-			pars = 0;
-		}
-		switch ( pars ) {
-			case 1:
-				while( (*(ptr) != '\0') && ((*ptr < 'A') || (*ptr > 'Z')) ){
-					ptr++;
-				}
-				break;
-			case 2:
-				while( (*(ptr) != '\0') && 									// Строка закончилась
-							 ((*ptr < '0') || (*ptr > '9')) && 		// Не цифра
-							 (*ptr != '+') && 										// Не знак "+"
-							 (*ptr != '-') ){											// Не знак "-"
-					ptr++;
-				}
-				if ( *ptr != '\0' ){
-					if( canId.msgId == TIME ) {
-						*((uint32_t *)can.Data) = atoul(ptr);
-						can.DLC = 4;
-						// TODO: Для STM32F207
-						// setRtcTime( *((uint32_t *)can.Data) );
-					}
-					else {
-						*((int16_t *)can.Data) = atoi((char*)ptr);
-						can.DLC = 2;
-					}
-					canId.adjCur = ADJ;
-					canId.s207 = S207;
-					canId.devId = devId;
-					can.ExtId = setIdList( &canId );
-					can.IDE = 1;
-					writeBuff( &txBuf, (uint8_t*)&can);
-					msgNum++;
-					pars = 0;
-				}
-				break;
-			default:
-				while( (*ptr != '\0') && (*(ptr++) != ';') )
-				{}
-				pars = 0;
-		}
+	switch( messId ){
+		case TO_IN:
+		case TO_OUT:
+			*((int16_t *)can->Data) = (int16_t)(atof((char *)msg) * 16);
+			can->DLC = 2;
+			break;
+		default:
+			*((uint32_t *)can->Data) = atoul(msg);
+			can->DLC = 4;
 	}
-
-	return msgNum;
+	return 1;
 }
 
 /* Формирует топик MQTT-сообщения в формате <S207_ID>/<DEVICE_ID>
@@ -138,76 +125,55 @@ int8_t mqttMsgDecod( uint32_t devId, uint8_t * msg, uint8_t len ){
  * возвращает длину строки топика
  */
 uint8_t mqttTopCoder( uint8_t * top, CanTxMsg * can ){
-	uint8_t len0, len;
+	uint8_t len, pos;
 	uint8_t tmp[5], *ptmp;
+	uint8_t msgId;
 
+	pos = 0;
 	ptmp = tmp;
-	len0 = hlToStr( s207Id, &top );
+	pos = hlToStr( s207Id, &top );
 	*top++ = '/';
-	len0++;
-	// Дентификатор устройства, передавшего сообщение - в топик
+	pos++;
+
+	// Идентификатор устройства, передавшего сообщение - в топик
 	len = hlToStr( (can->ExtId & DEV_ID_MASK), &ptmp );
-	for( uint8_t i = len; i < 5; i++) {
+	for( uint8_t i = len; i < 8; i++) {
 		*top++ = '0';
 	}
 	memcpy( top, tmp, len);
-	*(top+len) = '\0';
-	return (len0+len);
+	top += len;
+	*top++ = '/';
+	pos += 9;
+// COLD-HOT
+	if( (msgId = (can->ExtId & MSG_ID_MASK) >> 22) != TIME ){
+		uint8_t hot = ((can->ExtId & COLD_HOT_MASK) >> 21)+2;
+		memcpy( top, param[hot].name, param[hot].len );
+		pos += param[hot].len+1;
+		top += param[hot].len;
+		*top++ = '/';
+	}
+	memcpy( top, param[msgId].name, param[msgId].len );
+	pos += param[msgId].len;
+
+	*(top + param[msgId].len) = '\0';
+	return (pos);
 }
 
 
 uint8_t mqttMsgCoder( uint8_t * msg, CanTxMsg *can) {
-	uint8_t *startMsg = msg;			// Указатель на начало строки
-	uint8_t msgId;
-	uint8_t param2[10];
-	uint8_t *param1;
-	time_t ut;
-
-// Сначала выставляем метку времени
-	memcpy( msg, "Time:", 5);
-	msg += 5;
-
-// ************* Это будет для STM32f207 **************
-	ut = getRtcTime();
-	timeToStr( ut, msg );
-//	memcpy( msg, asctime( gmtime(&ut) ), 24);
-
-	msg +=19;
+	eMessId msgId;
+	uint8_t len;
 
 	msgId = (can->ExtId & MSG_ID_MASK) >> 22;
-	if( msgId != TIME ) {
+	if( (msgId == TO_IN) || (msgId == TO_OUT) ) {
 		// Теперь название и значение параметра
-		*msg++ = ';';
-		if( msgId > 0x20 ){
-			msgId -= 0x21;
-			param1 = error[msgId];
-			strcpy( (char *)param2,"Fault");
-		}
-		else {
-			param1 = param[msgId];
-			if ( can->ExtId & COLD_HOT_MASK ){
-				strcpy( (char *)param2, "Hot");
-			}
-			else {
-				strcpy( (char *)param2, "Cold");
-			}
-		}
-		strcpy( (char *)msg, (char *)param1 );
-		msg += strlen((char *)param1);
-		*msg++ = ',';
-		strcpy( (char *)msg, (char *)param2);
-		msg += strlen((char *)param2);
-		*msg++ = ':';
-		param1 = param2;
-		lToStr( *((int16_t *)can->Data), param1);
-		strcpy( (char *)msg, (char *)param1 );
-		for(;*msg != '\0';	msg++)
-		{}
+		fToStr( (float)*((int16_t *)can->Data)/16, msg );
+		len = strlen( (char *)msg );
 	}
-	*msg++ = '\n';
-	*msg = '\0';
-
-	return strlen((char *)startMsg);
+	else {
+		len = ulToStr( *((uint32_t *)can->Data), &msg );
+	}
+	return len;
 }
 
 
@@ -241,7 +207,6 @@ int32_t hexToL( uint32_t *devId, uint8_t *pStr, uint16_t len ){
 	*devId = id;
 	return len-1;
 }
-
 
 int16_t atoi( uint8_t *str[] ){
 	int16_t i, l;
@@ -318,8 +283,8 @@ uint8_t hlToStr(uint32_t l, uint8_t **str){
 
 }
 
-//typedef RTC_TimeTypeDef tTime;
-//typedef RTC_DateTypeDef tDate;
+typedef RTC_TimeTypeDef tTime;
+typedef RTC_DateTypeDef tDate;
 void timeToStr( time_t ut, uint8_t *str ) {
 	tTime t;
 	tDate d;
@@ -370,5 +335,4 @@ void timeToStr( time_t ut, uint8_t *str ) {
 	*str = '\0';
 
 }
-
 */

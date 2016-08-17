@@ -173,6 +173,22 @@ void EXTI15_10_IRQHandler(void)
 /*  available peripheral interrupt handler's name please refer to the startup */
 /*  file (startup_stm32f2xx.s).                                               */
 /******************************************************************************/
+void CAN1_RX0_IRQHandler(void)
+{
+	canRx0IrqHandler();
+}
+
+void CAN1_TX_IRQHandler( void ) {
+	canTxIrqHandler();
+}
+
+void CAN1_RX1_IRQHandler( void ){
+	canRx1IrqHandler();
+}
+
+void CAN1_SCE_IRQHandler( void ){
+	canSceIrqHandler();
+}
 
 /**
   * @brief  This function handles PPP interrupt request.

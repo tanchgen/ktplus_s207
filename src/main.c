@@ -25,6 +25,8 @@
 #include "main.h"
 #include "lwip/tcp.h"
 #include "my_cli.h"
+#include "can.h"
+#include "mqttApp.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -32,11 +34,13 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+//extern volatile uint32_t myTick;
 __IO uint32_t LocalTime = 0; /* this variable is used to create a time reference incremented by 10ms */
 uint32_t timingdelay;
 
 //void lwip_init( void );
 /* Private function prototypes -----------------------------------------------*/
+void systickConfig(void);
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -52,8 +56,16 @@ int main(void)
        To reconfigure the default setting of SystemInit() function, refer to
        system_stm32f2xx.c file
      */  
+	systickConfig();
 
-  /* Configure ethernet (GPIOs, clocks, MAC, DMA) */ 
+	canBufferInit();
+
+  // At this stage the system clock should have already been configured
+  // at high speedreadBuff.
+	canInit();
+  // Infinite loop
+
+	/* Configure ethernet (GPIOs, clocks, MAC, DMA) */
   ETH_BSP_Config();
     
   /* Initilaize the LwIP stack */
@@ -61,10 +73,12 @@ int main(void)
 //  lwip_init();
   cliPrevInit();
   dnsStart();
+	mqttAppInit();
 
   /* Infinite loop */
   while (1)
   {  
+  	canProcess();
   	cliProcess();
     /* check if any packet received */
     if (ETH_CheckFrameReceived())
@@ -85,8 +99,6 @@ void systickConfig(void) {
   SysTick_Config(RCC_Clocks.HCLK_Frequency/1000);
   NVIC_SetPriority(SysTick_IRQn, 0);
   NVIC_EnableIRQ(SysTick_IRQn);
-#define SYSTICK_CLKSOURCE_HCLK         ((uint32_t)0x00000004)
-  SysTick->CTRL |= SYSTICK_CLKSOURCE_HCLK;
 
 }
 /**

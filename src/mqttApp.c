@@ -7,7 +7,7 @@
 
 #include "lwip/timers.h"
 #include "mqttApp.h"
-
+#include "main.h"
 #include "buffer.h"
 #include "can.h"
 #include "mqtt_codec.h"
@@ -24,25 +24,16 @@ uint32_t s207Id;
 
 void mqttAppMsgReceived(Mqtt *this, uint8_t *topic, uint8_t topicLen, uint8_t *data, uint32_t dataLen)
 {
-	uint32_t devId;
-	uint8_t strTopic[topicLen + 1];
-	memcpy(strTopic, topic, topicLen);
-	strTopic[topicLen] = '\0';
+	CanTxMsg tmpMess;
+	eMessId msgId;
 
-	uint8_t strData[dataLen + 1];
-	memcpy(strData, data, dataLen);
-	strData[dataLen] = '\0';
-
-	mqttTopDecod( &devId, strTopic, topicLen );
-	// TODO: Парсинг сообщений
-	mqttMsgDecod( devId, strData, dataLen );
+	(void)this;
+	msgId = mqttTopDecod( &tmpMess, topic, topicLen );
+	if (mqttMsgDecod( &tmpMess, data, dataLen, msgId ) == 1){
+		writeBuff( &canTxBuf, (uint8_t *)&tmpMess );
+	}
 //	UARTprintf("Topic: %s, Data: %s", strTopic, strData);
 
-}
-
-void mqttAppSend()
-{
-    uint8_t flag = mqttPublish(&mqtt, "/presence", "Hello, here is mbed!");
 }
 
 void mqttAppInit()
@@ -67,21 +58,6 @@ void mqttAppInit()
 //	sys_timeout( MQTT_TMR_INTERVAL, mqttTimer, (void *)&neth);
 }
 
-
-void mqttAppConnect( void )
-{
-	uint32_t flag;
-
-	mqtt.autoConnect = 0;
-
-    flag = mqttConnect(&mqtt);
-
-    //mqttSubscribe(&mqtt, "/rf/#");
-
-    //mqttAppSend();
-
-}
-
 void mqttAppPublish(char *topic, char *data)
 {
 	mqttPublish(&mqtt, topic, data);
@@ -97,13 +73,19 @@ void mqttAppHandle( void )
 {
 	CanRxMsg rxCan;
 
-	if (&mqtt.connected) {
-		if( readBuff( &rxBuf, &rxCan  ) ) {
+	if (mqtt.connected && mqtt.pubFree) {
+		if( readBuff( &canRxBuf, (uint8_t *)&rxCan  ) ) {
 			uint8_t top[256];
 			uint8_t msg[256];
 			mqttTopCoder( top, (CanTxMsg *)&rxCan );
 			mqttMsgCoder( msg, (CanTxMsg *)&rxCan );
-			mqttPublish( &mqtt, (char *)top, (char *)msg );
+			if( mqttPublish( &mqtt, (char *)top, (char *)msg ) == 0){
+				mqtt.pubFree = FALSE;
+			}
+			else {
+				writeBuff( &canRxBuf, (uint8_t *)&rxCan );
+			}
+
 		}
 		else {
 			mqttLive(&mqtt);

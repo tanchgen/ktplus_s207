@@ -50,6 +50,10 @@ struct Mqtt
 	char deviceId[9];
 	char username[80];
 	char password[42];
+	uint8_t * pubTopic;
+	uint8_t * subsTopic;
+	uint8_t subs;							//Флаг созданной подписки.
+	uint8_t pubFree;							//Флаг отправленной пудликации.
 	uint8_t pollAbortCounter;
 };
 
@@ -67,6 +71,8 @@ typedef struct MqttFixedHeader
 #define MQTT_MSGT_PINGRESP	(13 << 4)
 #define MQTT_MSGT_PUBLISH	(3 << 4)
 #define MQTT_MSGT_CONACK	(2 << 4)
+#define MQTT_MSGT_SUBACK	(9 << 4)
+#define MQTT_MSGT_PUBACK	(4 << 4)
 
 #define MQTT_PINGREQ_HEADER (MQTT_MSGT_PINGREQ)
 
@@ -78,5 +84,7 @@ uint8_t mqttDisconnect(Mqtt *this);
 uint8_t mqttSubscribe(Mqtt *this, char* topic);
 uint8_t mqttLive(Mqtt *this);
 void mqttDisconnectForced(Mqtt *this);
+uint8_t mqttTcpConnect(Mqtt *this);
+uint8_t mqttBrokConnect(Mqtt *this);
 
 #endif /* MQTT_H_ */

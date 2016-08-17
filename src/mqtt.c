@@ -7,12 +7,76 @@
 
 #include "my_cli.h"
 #include "mqtt.h"
+#include "name.h"
+#include "main.h"
 #include <stdint.h>
 #include <string.h>
 
 //#include "utils/uartstdio.h"
 
 extern volatile uint32_t LocalTime;
+
+
+/**
+ * Writes one character to an output buffer.
+ * @param pptr pointer to the output buffer - incremented by the number of bytes used & returned
+ * @param c the character to write
+ */
+void writeChar(unsigned char** pptr, char c)
+{
+	**pptr = c;
+	(*pptr)++;
+}
+
+
+/**
+ * Writes an integer as 2 bytes to an output buffer.
+ * @param pptr pointer to the output buffer - incremented by the number of bytes used & returned
+ * @param anInt the integer to write
+ */
+void writeInt(unsigned char** pptr, int anInt)
+{
+	**pptr = (unsigned char)(anInt / 256);
+	(*pptr)++;
+	**pptr = (unsigned char)(anInt % 256);
+	(*pptr)++;
+}
+
+
+/**
+ * Writes a "UTF" string to an output buffer.  Converts C string to length-delimited.
+ * @param pptr pointer to the output buffer - incremented by the number of bytes used & returned
+ * @param string the C string to write
+ */
+void writeCString(unsigned char** pptr, const char* string)
+{
+	int len = strlen(string);
+	writeInt(pptr, len);
+	memcpy(*pptr, string, len);
+	*pptr += len;
+}
+
+/**
+ * Encodes the message length according to the MQTT algorithm
+ * @param buf the buffer into which the encoded data is written
+ * @param length the length to be encoded
+ * @return the number of bytes written to buffer
+ */
+int mqttPacket_encode(unsigned char* buf, int length)
+{
+	int rc = 0;
+
+	do
+	{
+		char d = length % 128;
+		length /= 128;
+		/* if there are more digits to encode, set the top bit of this digit */
+		if (length > 0)
+			d |= 0x80;
+		buf[rc++] = d;
+	} while (length > 0);
+	return rc;
+}
 
 
 
@@ -50,8 +114,14 @@ err_t recv_callback(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
 
     		case MQTT_MSGT_CONACK:
     			this->connected = 1;
+    			neth.netState = MQTT_CONNECTED;
     			break;
-
+    		case MQTT_MSGT_SUBACK:
+    			this->subs = TRUE;
+    			break;
+    		case MQTT_MSGT_PUBACK:
+    			this->pubFree = TRUE;
+    			break;
 //    		default:
 //    			UARTprintf("default:\n");
     	}
@@ -84,7 +154,7 @@ err_t accept_callback(void *arg, struct tcp_pcb *npcb, err_t err) {
 
 	this->connected = 1;
 
-	neth.netState = MQTT_CONNECTED;
+	neth.netState = TCP_CONNECTED;
 
     /* Subscribe a receive callback function */
     tcp_recv(npcb, recv_callback);
@@ -115,9 +185,18 @@ void mqttInit(Mqtt *this, struct ip_addr serverIp, int port, msgReceived fn, cha
 	this->server = serverIp;
 	this->port = port;
 	this->connected = 0;
-	memcpy(this->deviceId, devId, 9);
-	this->autoConnect = 0;
+	memcpy(this->deviceId, "ktS207", 6);
+	memcpy(this->deviceId+6, devId+4, 4);
 
+	this->autoConnect = 0;
+	strcpy( this->username, "jet" );
+	strcpy( this->password, "alljet" );
+	strcpy( (char *)subsTop, devId);
+	strcat( (char *)subsTop, "SU/#");
+	this->subsTopic = subsTop;
+	strcpy( (char *)pubTop, devId);
+	strcat( (char *)pubTop, "PB");
+	this->pubTopic = pubTop;
 }
 
 
@@ -179,7 +258,7 @@ http_poll(void *arg, struct tcp_pcb *pcb)
   return ERR_OK;
 }
 
-uint8_t mqttConnect(Mqtt *this) {
+uint8_t mqttTcpConnect(Mqtt *this) {
 
 	if(this->connected)
 		return 1;
@@ -209,53 +288,76 @@ uint8_t mqttConnect(Mqtt *this) {
     //device_poll();
 
     // variable header
-    uint8_t var_header[] = {0x00,0x06,0x4d,0x51,0x49,0x73,0x64,0x70,0x03,0x02,0x00,KEEPALIVE/1000,0x00,strlen(this->deviceId)};
+//    uint8_t var_header[] = {0x00,0x06,'M','Q','T',0x73,0x64,0x70,0x03,0x02,0x00,KEEPALIVE/1000,0x00,strlen(this->deviceId)};
 
     // fixed header: 2 bytes, big endian
-    uint8_t fixed_header[] = {MQTTCONNECT,0};
-
-    char packet[sizeof(fixed_header)+sizeof(var_header)+strlen(this->deviceId)];
-
-    uint8_t len,l;
-
-    len = 12+strlen(this->deviceId)+2;
-    if ((l=strlen(this->username))){
-    	len += l+2;
-    }
-    if ((l=strlen(this->username))){
-    	len += l+2;
-    }
-    fixed_header[1] = len;
-
-    // Clear memory
-    memset(packet,0,sizeof(packet));
-
-    // Copy fixed header
-    memcpy(packet,fixed_header,sizeof(fixed_header));
-    // Copy variable header
-    memcpy(packet+sizeof(fixed_header),var_header,sizeof(var_header));
-    // Copy device name
-    memcpy(packet+sizeof(fixed_header)+sizeof(var_header),this->deviceId,strlen(this->deviceId));
-
-    //Send MQTT identification message to broker.
-    err = tcp_write(this->pcb, (void *)packet, sizeof(packet), 1);
-
-    if (err == ERR_OK) {
-        tcp_output(this->pcb);
-        this->lastActivity = LocalTime;
-        //this->connected = 1;
-        // UARTprintf("Identificaiton message sended correctlly...\n");
-        return 0;
-    } else {
-    	// UARTprintf("Failed to send the identification message to broker...\n");
-    	// UARTprintf("Error is: %d\n",err);
-    	mqttDisconnectForced(this);
-        return 1;
-    }
-
     return 0;
 }
 
+uint8_t mqttBrokConnect( Mqtt * this ){
+
+  unsigned char packet[1024];
+  unsigned char * pPacket = packet;
+
+  uint8_t len, l;
+
+  len = 10 + strlen(this->deviceId)+2;	// Для версии 3.1.1 заголовок = 10 байт (для 3.1 - 12 байт)
+  if ((l=strlen(this->username))){
+  	len += l+2;
+  }
+  if ((l=strlen(this->password))){
+  	len += l+2;
+  }
+
+  // Clear memory
+//    memset(pPacket,0,sizeof(packet));
+
+  // Copy fixed header
+  *(pPacket++) = MQTTCONNECT;
+  pPacket += mqttPacket_encode(pPacket, len); /* write remaining length */
+
+  // Copy variable header
+#if MQTT_VER_31
+	writeCString(&pPacket, "MQIsdp");
+	*(pPacket++) = 3;
+#else
+	writeCString(&pPacket, "MQTT");
+	*(pPacket++) = 4;
+#endif
+
+#define USER_FLAG			0x80
+#define PASS_FLAG			0x40
+	if ( strlen(this->username) ){
+		*(pPacket++) = USER_FLAG | PASS_FLAG;
+	}
+	else {
+		*(pPacket++) = 0;
+	}
+
+	writeInt( &pPacket, KEEPALIVE/100 );
+
+  writeCString( &pPacket, this->deviceId );
+  if( packet[9] & 0x80){
+  	writeCString( &pPacket, this->username );
+  	writeCString( &pPacket, this->password );
+  }
+  len = pPacket - packet;
+
+  //Send MQTT identification message to broker.
+  if( tcp_write(this->pcb, (void *)packet, len, 1) == ERR_OK ) {
+      tcp_output(this->pcb);
+      this->lastActivity = LocalTime;
+      //this->connected = 1;
+      // UARTprintf("Identificaiton message sended correctlly...\n");
+  } else {
+  	// UARTprintf("Failed to send the identification message to broker...\n");
+  	// UARTprintf("Error is: %d\n",err);
+  	mqttDisconnectForced(this);
+      return 1;
+  }
+  neth.netState = MQTT_CONNECT;
+  return 0;
+}
 
 uint8_t mqttPublish(Mqtt *this, char* pub_topic, char* msg) {
 
@@ -296,7 +398,7 @@ uint8_t mqttPublish(Mqtt *this, char* pub_topic, char* msg) {
     return 0;
 }
 
-
+/*
 static void
 close_conn(struct tcp_pcb *pcb)
 {
@@ -313,7 +415,7 @@ close_conn(struct tcp_pcb *pcb)
       //LWIP_DEBUGF(HTTPD_DEBUG, ("Error %d closing 0x%08x\n", err, pcb));
   }
 }
-
+*/
 
 uint8_t mqttDisconnect(Mqtt *this) {
 
@@ -336,41 +438,41 @@ uint8_t mqttDisconnect(Mqtt *this) {
 
 uint8_t mqttSubscribe(Mqtt *this, char* topic) {
 
-    if (!this->connected)
+    if (!this->connected){
     	return -1;
+    }
 
-        uint8_t var_header_topic[] = {0,10};
-        uint8_t fixed_header_topic[] = {MQTTSUBSCRIBE,sizeof(var_header_topic)+strlen(topic)+3};
+    uint8_t var_header_topic[] = {0,10};
+    uint8_t fixed_header_topic[] = {MQTTSUBSCRIBE,sizeof(var_header_topic)+strlen(topic)+3};
 
-        // utf topic
-        uint8_t utf_topic[strlen(topic)+3];
-        strcpy((char *)&utf_topic[2], topic);
+    // utf topic
+    uint8_t utf_topic[strlen(topic)+3];
+    strcpy((char *)&utf_topic[2], topic);
 
-        utf_topic[0] = 0;
-        utf_topic[1] = strlen(topic);
-        utf_topic[sizeof(utf_topic)-1] = 0;
+    utf_topic[0] = 0;
+    utf_topic[1] = strlen(topic);
+    utf_topic[sizeof(utf_topic)-1] = 0;
 
-        char packet_topic[sizeof(var_header_topic)+sizeof(fixed_header_topic)+strlen(topic)+3];
-        memset(packet_topic,0,sizeof(packet_topic));
-        memcpy(packet_topic,fixed_header_topic,sizeof(fixed_header_topic));
-        memcpy(packet_topic+sizeof(fixed_header_topic),var_header_topic,sizeof(var_header_topic));
-        memcpy(packet_topic+sizeof(fixed_header_topic)+sizeof(var_header_topic),utf_topic,sizeof(utf_topic));
-
-        //Send message
-        err_t err = tcp_write(this->pcb, (void *)packet_topic, sizeof(packet_topic), 1); //TCP_WRITE_FLAG_MORE
-        if (err == ERR_OK) {
-            tcp_output(this->pcb);
-            // UARTprintf("Subscribe sucessfull to: %s...\r\n", topic);
-        } else {
-            // UARTprintf("Failed to subscribe to: %s...\r\n", topic);
-            // UARTprintf("Error is: %d\r\n",err);
-            mqttDisconnectForced(this);
-            return 1;
-        }
-        // UARTprintf("\r\n");
-        //device_poll();
-
-        return 0;
+    char packet_topic[sizeof(var_header_topic)+sizeof(fixed_header_topic)+strlen(topic)+3];
+    memset(packet_topic,0,sizeof(packet_topic));
+    memcpy(packet_topic,fixed_header_topic,sizeof(fixed_header_topic));
+    memcpy(packet_topic+sizeof(fixed_header_topic),var_header_topic,sizeof(var_header_topic));
+    memcpy(packet_topic+sizeof(fixed_header_topic)+sizeof(var_header_topic),utf_topic,sizeof(utf_topic));
+    //Send message
+    err_t err = tcp_write(this->pcb, (void *)packet_topic, sizeof(packet_topic), 1); //TCP_WRITE_FLAG_MORE
+    if (err == ERR_OK) {
+      tcp_output(this->pcb);
+      // UARTprintf("Subscribe sucessfull to: %s...\r\n", topic);
+    }
+    else {
+      // UARTprintf("Failed to subscribe to: %s...\r\n", topic);
+      // UARTprintf("Error is: %d\r\n",err);
+      mqttDisconnectForced(this);
+      return 1;
+    }
+    // UARTprintf("\r\n");
+    //device_poll();
+    return 0;
 
 }
 
@@ -405,23 +507,25 @@ int mqttPing(Mqtt *this)
 
 uint8_t mqttLive(Mqtt *this) {
 
-
 	uint32_t t = LocalTime;
-	if (t - this->lastActivity > (KEEPALIVE - 2000)) {
+
+	if (t - this->lastActivity > (KEEPALIVE - 4700)) {
 
 		if (this->connected) {
 			// UARTprintf("Sending keep-alive\n");
 			mqttPing(this);
-		} else if(this->autoConnect){
-			mqttConnect(this);
-		} else {
+		}
+		else if(this->autoConnect){
+			mqttTcpConnect(this);
+		}
+		else {
 			neth.netState = NAME_RESOLVED;
 		}
 
 		this->lastActivity = t;
 	}
 
-    return 0;
+  return 0;
 }
 
 /*

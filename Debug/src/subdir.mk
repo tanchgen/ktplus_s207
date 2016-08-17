@@ -6,6 +6,7 @@
 C_SRCS += \
 ../src/_write.c \
 ../src/buffer.c \
+../src/can.c \
 ../src/fmt_translate.c \
 ../src/main.c \
 ../src/mqtt.c \
@@ -19,6 +20,7 @@ C_SRCS += \
 OBJS += \
 ./src/_write.o \
 ./src/buffer.o \
+./src/can.o \
 ./src/fmt_translate.o \
 ./src/main.o \
 ./src/mqtt.o \
@@ -32,6 +34,7 @@ OBJS += \
 C_DEPS += \
 ./src/_write.d \
 ./src/buffer.d \
+./src/can.d \
 ./src/fmt_translate.d \
 ./src/main.d \
 ./src/mqtt.d \

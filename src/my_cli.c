@@ -14,12 +14,15 @@
 #include "lwip/timers.h"
 #include "mqtt.h"
 #include "mqttApp.h"
+#include "my_time.h"
 #include "my_cli.h"
 
 tNeth neth;
-//uint8_t rxBuffer[RX_BUF_SIZE];
-//uint8_t txBuffer[TX_BUF_SIZE];
+extern volatile uint32_t myTick;
 
+uint8_t subsTop[80];
+uint8_t pubTop[80];
+uint32_t subsTout;
 
 err_t cliPrevInit( void ) {
 
@@ -113,17 +116,40 @@ void cliProcess( void ) {
 			break;
 
 		case NAME_NOT_RESOLVED:
+			neth.connCount = 10;
 			dnsStart();
 			break;
 		case NAME_RESOLVED:
 			sntp_init();
-			mqttAppInit();
-			mqttConnect( &mqtt );
-			neth.netState = MQTT_CONNECT;
+			mqttTcpConnect( &mqtt );
+	    neth.netState = TCP_CONNECT;
+	    neth.connTout = myTick + CONN_TIMEOUT;
+			break;
+		case TCP_CONNECT:
+			if( neth.connTout < myTick ){
+				if( neth.connCount-- ){
+					neth.netState = NAME_RESOLVED;
+			    neth.connTout = myTick + CONN_TIMEOUT;
+				}
+				else {
+					neth.netState = NAME_NOT_RESOLVED;
+					myDelay( 2000 );
+					neth.connCount = 10;
+				}
+			}
 			break;
 		case MQTT_CONNECT:
 			break;
+		case TCP_CONNECTED:
+			mqtt.subs = FALSE;
+			mqtt.pubFree = TRUE;
+			mqttBrokConnect( &mqtt );
+			break;
 		case MQTT_CONNECTED:
+			if( !mqtt.subs && (subsTout < myTick) ){
+				mqttSubscribe( &mqtt, (char *)mqtt.subsTopic );
+				subsTout = myTick + 2000;
+			}
 			mqttAppHandle();
 			break;
 		case TCP_CLOSED:
@@ -178,10 +204,11 @@ err_t tcpConnected( void * arg, struct tcp_pcb * tpcb, err_t err ){
  *            callback function!
  */
 err_t tcpRecv( void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err) {
-  tNeth * eh = NULL;			// Указатель на структуру клиентского Ethernet-соединения
+/*
+	tNeth * eh = NULL;			// Указатель на структуру клиентского Ethernet-соединения
 	eh = (tNeth *)arg;
 	uint16_t i;
-/*
+
 	if (p == NULL)
   {
 		if ( err != ERR_OK) {

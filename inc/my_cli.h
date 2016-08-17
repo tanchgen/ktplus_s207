@@ -19,7 +19,7 @@
 #define LOCAL_PORT					63180
 #define MQTT_PORT						1883
 
-#define CONN_TIMEOUT				10000				// Таймаут для установки соединения
+#define CONN_TIMEOUT				5000				// Таймаут для установки соединения
 
 /* MAC ADDRESS: MAC_ADDR0:MAC_ADDR1:MAC_ADDR2:MAC_ADDR3:MAC_ADDR4:MAC_ADDR5 */
 
@@ -33,13 +33,13 @@
 /*Static IP ADDRESS: IP_ADDR0.IP_ADDR1.IP_ADDR2.IP_ADDR3 */
 #define LOCAL_IP0   192
 #define LOCAL_IP1  	168
-#define LOCAL_IP2  	0
-#define LOCAL_IP3 	10
+#define LOCAL_IP2  	11
+#define LOCAL_IP3 	7
 
-#define DEST_IP0		213
-#define DEST_IP1		180
-#define DEST_IP2		193
-#define DEST_IP3		3
+#define DEST_IP0		192
+#define DEST_IP1		168
+#define DEST_IP2		11
+#define DEST_IP3		13
 
 #define DEST_PORT		80
 
@@ -52,7 +52,7 @@
 /*Gateway Address*/
 #define GW0	   			192
 #define GW1   			168
-#define GW2   			0
+#define GW2   			11
 #define GW3   			1
 
 #define DNS0	   		77
@@ -74,6 +74,8 @@ typedef enum {
 	NAME_RESOLVING,
 	NAME_RESOLVED,
 	NAME_NOT_RESOLVED,
+	TCP_CONNECT,
+	TCP_CONNECTED,
 	MQTT_CONNECT,
 	MQTT_CONNECTED,
 	TIMEOUT,
@@ -108,12 +110,16 @@ typedef struct {
 	struct pbuf	* rxPbuf;							// Указатель на начальный PBUF приема
 	uint16_t pbufOffset;							// Сдвиг в цепочке PBUF до начала неперенесенных в rxTmpBuf данных
 */
-	uint8_t connTout;
+	uint32_t connTout;
 	tNetState netState;
+	uint8_t connCount;
 } tNeth;
 
 
 extern tNeth neth;
+extern uint8_t subsTop[];
+extern uint8_t pubTop[];
+
 
 err_t cliPrevInit( void );
 err_t tcpCliInit( void );
