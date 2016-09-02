@@ -18,6 +18,6 @@ uint8_t lToStr(int32_t l, uint8_t *str );
 uint8_t ulToStr(uint32_t l, uint8_t **str);
 uint8_t hlToStr(uint32_t l, uint8_t **str);
 void timeToStr( time_t ut, uint8_t *str );
-void fToStr(float f, uint8_t r[]);
+void fToStr(float f, uint8_t r[], uint8_t maxLen);
 
 #endif /* FMT_TRANSLATE_H_ */

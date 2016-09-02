@@ -23,6 +23,7 @@
 
 #define CAN_RCC_CAN 									RCC_APB1Periph_CAN1
 #define CAN_CAN 											CAN1
+
 /*
 
 #define CAN_RX0_NVIC_IRQCHANNEL 			CAN1_RX0_IRQn

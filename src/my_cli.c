@@ -142,7 +142,6 @@ void cliProcess( void ) {
 			break;
 		case TCP_CONNECTED:
 			mqtt.subs = FALSE;
-			mqtt.pubFree = TRUE;
 			mqttBrokConnect( &mqtt );
 			break;
 		case MQTT_CONNECTED:
@@ -150,7 +149,7 @@ void cliProcess( void ) {
 				mqttSubscribe( &mqtt, (char *)mqtt.subsTopic );
 				subsTout = myTick + 2000;
 			}
-			mqttAppHandle();
+			mqttAppHandle( &mqtt );
 			break;
 		case TCP_CLOSED:
 			neth.netState = NAME_RESOLVED;

@@ -29,8 +29,9 @@ void mqttAppMsgReceived(Mqtt *this, uint8_t *topic, uint8_t topicLen, uint8_t *d
 
 	(void)this;
 	msgId = mqttTopDecod( &tmpMess, topic, topicLen );
-	if (mqttMsgDecod( &tmpMess, data, dataLen, msgId ) == 1){
+	if (msgId && (mqttMsgDecod( &tmpMess, data, dataLen, msgId) == 1) ){
 		writeBuff( &canTxBuf, (uint8_t *)&tmpMess );
+		writeBuff( &canRxBuf, (uint8_t *)&tmpMess );
 	}
 //	UARTprintf("Topic: %s, Data: %s", strTopic, strData);
 
@@ -69,20 +70,21 @@ void mqttAppDisconnect()
 }
 
 
-void mqttAppHandle( void )
+void mqttAppHandle( Mqtt * this )
 {
 	CanRxMsg rxCan;
 
-	if (mqtt.connected && mqtt.pubFree) {
+	if (mqtt.connected) {
 		if( readBuff( &canRxBuf, (uint8_t *)&rxCan  ) ) {
 			uint8_t top[256];
 			uint8_t msg[256];
-			mqttTopCoder( top, (CanTxMsg *)&rxCan );
+			// Вносим корень топика (ID kt-s207)
+			uint8_t len = strlen( this->pubTopic );
+			memcpy( top, this->pubTopic, len );
+
+			mqttTopCoder( top+len, (CanTxMsg *)&rxCan );
 			mqttMsgCoder( msg, (CanTxMsg *)&rxCan );
-			if( mqttPublish( &mqtt, (char *)top, (char *)msg ) == 0){
-				mqtt.pubFree = FALSE;
-			}
-			else {
+			if( mqttPublish( &mqtt, (char *)top, (char *)msg ) != 0){
 				writeBuff( &canRxBuf, (uint8_t *)&rxCan );
 			}
 

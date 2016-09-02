@@ -21,6 +21,7 @@
 
 volatile time_t uxTime;
 volatile uint32_t myTick;
+volatile uint32_t usCountDown;
 
 // *********** Инициализация структуры ВРЕМЯ (сейчас - системное ) ************
 void timeInit( void ) {

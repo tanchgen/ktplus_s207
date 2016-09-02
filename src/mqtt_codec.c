@@ -67,8 +67,11 @@ uint16_t mqttTopDecod( CanTxMsg *txMsg, uint8_t top[], uint16_t topLen) {
 			break;
 		}
 	}
+	canId.adjCur = ADJ;
 	txMsg->ExtId = setIdList( &canId );
 	txMsg->IDE = 1;
+	txMsg->RTR = 0;
+	txMsg->StdId = 0;
 
 	return canId.msgId;
 }
@@ -81,13 +84,14 @@ static uint8_t topicParse( uint8_t * top, uint8_t * level, tCanId * canId ){
 		if( memcmp( top, param[i].name, param[i].len) == 0 ){
 			if ( i == 1 ){
 				(*level)++;
+				canId->msgId = TIME;
 			}
 			if (*level == 2){
 				canId->coldHot = i-2;
 				return 1;
 			}
 			else if(*level == 3){
-				canId->msgId = i;
+				canId->msgId = i-3;
 				return 1;
 			}
 		}
@@ -131,7 +135,6 @@ uint8_t mqttTopCoder( uint8_t * top, CanTxMsg * can ){
 
 	pos = 0;
 	ptmp = tmp;
-	pos = hlToStr( s207Id, &top );
 	*top++ = '/';
 	pos++;
 
@@ -167,7 +170,7 @@ uint8_t mqttMsgCoder( uint8_t * msg, CanTxMsg *can) {
 	msgId = (can->ExtId & MSG_ID_MASK) >> 22;
 	if( (msgId == TO_IN) || (msgId == TO_OUT) ) {
 		// Теперь название и значение параметра
-		fToStr( (float)*((int16_t *)can->Data)/16, msg );
+		fToStr( (float)*((int16_t *)can->Data)/16, msg, 6 );
 		len = strlen( (char *)msg );
 	}
 	else {

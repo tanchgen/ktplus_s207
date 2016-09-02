@@ -37,6 +37,11 @@ typedef struct Mqtt Mqtt;
 
 typedef void (*msgReceived)(Mqtt *this, uint8_t *topic, uint8_t topicLen, uint8_t *data, uint32_t dataLen);
 
+enum QoS {
+	QOS0,
+	QOS1,
+	QOS2
+};
 
 struct Mqtt
 {
@@ -52,6 +57,7 @@ struct Mqtt
 	char password[42];
 	uint8_t * pubTopic;
 	uint8_t * subsTopic;
+	uint16_t mqttPackId;
 	uint8_t subs;							//Флаг созданной подписки.
 	uint8_t pubFree;							//Флаг отправленной пудликации.
 	uint8_t pollAbortCounter;

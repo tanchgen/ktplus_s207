@@ -79,7 +79,6 @@ int mqttPacket_encode(unsigned char* buf, int length)
 }
 
 
-
 err_t recv_callback(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
     //UARTprintf("TCP callback from %d.%d.%d.%d\r\n", ip4_addr1(&(pcb->remote_ip)),ip4_addr2(&(pcb->remote_ip)),ip4_addr3(&(pcb->remote_ip)),ip4_addr4(&(pcb->remote_ip)));
     uint8_t *mqttData;
@@ -139,8 +138,6 @@ err_t recv_callback(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
     return ERR_OK;
 }
 
-
-
 /* Accept an incomming call on the registered port */
 err_t accept_callback(void *arg, struct tcp_pcb *npcb, err_t err) {
 	LWIP_UNUSED_ARG(err);
@@ -197,6 +194,7 @@ void mqttInit(Mqtt *this, struct ip_addr serverIp, int port, msgReceived fn, cha
 	strcpy( (char *)pubTop, devId);
 	strcat( (char *)pubTop, "PB");
 	this->pubTopic = pubTop;
+	this->mqttPackId = 1;
 }
 
 
@@ -438,28 +436,30 @@ uint8_t mqttDisconnect(Mqtt *this) {
 
 uint8_t mqttSubscribe(Mqtt *this, char* topic) {
 
+		unsigned char subsPacket[24];
+		unsigned char * pSubs = subsPacket;
+		uint16_t len;
+
     if (!this->connected){
     	return -1;
     }
 
-    uint8_t var_header_topic[] = {0,10};
-    uint8_t fixed_header_topic[] = {MQTTSUBSCRIBE,sizeof(var_header_topic)+strlen(topic)+3};
+    *(pSubs++) = MQTTSUBSCRIBE | (QOS1<<1);
 
-    // utf topic
-    uint8_t utf_topic[strlen(topic)+3];
-    strcpy((char *)&utf_topic[2], topic);
+    mqttPacket_encode( pSubs, 2 + strlen(topic) + 3 );
+    pSubs++;
 
-    utf_topic[0] = 0;
-    utf_topic[1] = strlen(topic);
-    utf_topic[sizeof(utf_topic)-1] = 0;
+    writeInt( &pSubs, this->mqttPackId);
+    this->mqttPackId++;
 
-    char packet_topic[sizeof(var_header_topic)+sizeof(fixed_header_topic)+strlen(topic)+3];
-    memset(packet_topic,0,sizeof(packet_topic));
-    memcpy(packet_topic,fixed_header_topic,sizeof(fixed_header_topic));
-    memcpy(packet_topic+sizeof(fixed_header_topic),var_header_topic,sizeof(var_header_topic));
-    memcpy(packet_topic+sizeof(fixed_header_topic)+sizeof(var_header_topic),utf_topic,sizeof(utf_topic));
+    writeCString( &pSubs, topic );
+
+    *(pSubs++) = QOS0;
+
+    len = pSubs - subsPacket;
+
     //Send message
-    err_t err = tcp_write(this->pcb, (void *)packet_topic, sizeof(packet_topic), 1); //TCP_WRITE_FLAG_MORE
+    err_t err = tcp_write(this->pcb, (void *)subsPacket, len, 1); //TCP_WRITE_FLAG_MORE
     if (err == ERR_OK) {
       tcp_output(this->pcb);
       // UARTprintf("Subscribe sucessfull to: %s...\r\n", topic);
@@ -473,7 +473,6 @@ uint8_t mqttSubscribe(Mqtt *this, char* topic) {
     // UARTprintf("\r\n");
     //device_poll();
     return 0;
-
 }
 
 
@@ -509,7 +508,7 @@ uint8_t mqttLive(Mqtt *this) {
 
 	uint32_t t = LocalTime;
 
-	if (t - this->lastActivity > (KEEPALIVE - 4700)) {
+	if (t - this->lastActivity > (KEEPALIVE - 3000)) {
 
 		if (this->connected) {
 			// UARTprintf("Sending keep-alive\n");

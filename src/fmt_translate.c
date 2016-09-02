@@ -174,58 +174,43 @@ int n_tu(int number, int count)
 
 
 /***Convert float to string***/
-void fToStr(float f, uint8_t r[]) {
-    long long int length, length2, i, number, position, sign;
-    float number2;
+void fToStr(float f, uint8_t r[], uint8_t maxLen) {
+	uint8_t * pr = r;
 
-    sign = -1;   // -1 == positive number
-    if (f < 0)
-    {
-        sign = '-';
-        f *= -1;
-    }
+	uint32_t cel;
+	uint8_t len = 0;
+	float des;
 
+	maxLen--;
 
-    number2 = f;
-    number = f;
-    length = 0;  // size of decimal part
-    length2 = 0; //  size of tenth
+  if (f < 0)
+  {
+      f *= -1;
+      *(pr++) = '-';
+      len++;
+  }
 
-    /* calculate length2 tenth part*/
-    while( (number2 - (float)number) != 0.0 && !((number2 - (float)number) < 0.0) )
-    {
-         number2 = f * (n_tu(10.0, length2 + 1));
-         number = number2;
+  cel = f;
+	des = f - cel;
 
-         length2++;
-    }
+	len += ulToStr( cel, &pr );
 
-    /* calculate length decimal part*/
-    for(length = (f > 1) ? 0 : 1; f > 1; length++)
-        f /= 10;
-
-    position = length;
-    length = length + 1 + length2;
-    number = number2;
-    if(sign == '-')
-    {
-        length++;
-        position++;
-    }
-
-    for(i = length; i >= 0 ; i--)
-    {
-        if(i == (length))
-            r[i] = '\0';
-        else if(i == (position))
-            r[i] = '.';
-        else if(sign == '-' && i == 0)
-            r[i] = '-';
-        else
-        {
-            r[i] = (number % 10) + '0';
-            number /=10;
-        }
-    }
+	if( len < maxLen ){
+		if( des ) {
+			*(pr++) = '.';
+			len++;
+			while( des && (len < maxLen)){
+				uint8_t i;
+				i = (uint8_t)(des*10) % 10;
+				des = des*10 - i;
+				*(pr++) = i + '0';
+				len++;
+			}
+			while( *(pr-1) == '0'){
+				pr--;
+			}
+		}
+	}
+	*pr = '\0';
 }
 
