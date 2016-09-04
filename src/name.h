@@ -8,8 +8,8 @@
 #ifndef NAME_H_
 #define NAME_H_
 
-#define		USERNAME		"jet"
-#define		PASSWORD		"alljet"
+#define		USERNAME		"bpmdvqew"
+#define		PASSWORD		"KUS2gdM59OEY"
 
 
 #endif /* NAME_H_ */

@@ -186,8 +186,8 @@ void mqttInit(Mqtt *this, struct ip_addr serverIp, int port, msgReceived fn, cha
 	memcpy(this->deviceId+6, devId+4, 4);
 
 	this->autoConnect = 0;
-	strcpy( this->username, "jet" );
-	strcpy( this->password, "alljet" );
+	strcpy( this->username, USERNAME );
+	strcpy( this->password, PASSWORD );
 	strcpy( (char *)subsTop, devId);
 	strcat( (char *)subsTop, "SU/#");
 	this->subsTopic = subsTop;
@@ -332,7 +332,7 @@ uint8_t mqttBrokConnect( Mqtt * this ){
 		*(pPacket++) = 0;
 	}
 
-	writeInt( &pPacket, KEEPALIVE/100 );
+	writeInt( &pPacket, KEEPALIVE/1000 );
 
   writeCString( &pPacket, this->deviceId );
   if( packet[9] & 0x80){
@@ -508,7 +508,7 @@ uint8_t mqttLive(Mqtt *this) {
 
 	uint32_t t = LocalTime;
 
-	if (t - this->lastActivity > (KEEPALIVE - 3000)) {
+	if (t - this->lastActivity > (KEEPALIVE/10 * 7)) {
 
 		if (this->connected) {
 			// UARTprintf("Sending keep-alive\n");

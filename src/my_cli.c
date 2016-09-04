@@ -121,6 +121,7 @@ void cliProcess( void ) {
 			break;
 		case NAME_RESOLVED:
 			sntp_init();
+			*((uint32_t *)&mqtt.server) = neth.destIp;
 			mqttTcpConnect( &mqtt );
 	    neth.netState = TCP_CONNECT;
 	    neth.connTout = myTick + CONN_TIMEOUT;

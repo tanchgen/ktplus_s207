@@ -69,26 +69,26 @@ void canBspInit( void ){
 	RCC->AHB1ENR |= CAN_RCC_GPIOEN;
 
 	// CAN RX GPIO configuration
-	CAN_RX_PORT->MODER &= ~(3 << CAN_RX_PIN_NUM);
-	CAN_RX_PORT->MODER |= 2 << CAN_RX_PIN_NUM;			// Alternate function
+	CAN_RX_PORT->MODER &= ~(3 << (CAN_RX_PIN_NUM*2));
+	CAN_RX_PORT->MODER |= 2 << (CAN_RX_PIN_NUM*2);			// Alternate function
 
 	CAN_RX_PORT->OTYPER &= CAN_RX_PIN;
-	CAN_RX_PORT->PUPDR &= ~(3 << CAN_RX_PIN_NUM);		// PullUp-PullDown
+	CAN_RX_PORT->PUPDR &= ~(3 << (CAN_RX_PIN_NUM*2));		// PullUp-PullDown
 
-	CAN_RX_PORT->OSPEEDR &= ~(3 << CAN_RX_PIN_NUM);
-	CAN_RX_PORT->OSPEEDR |= 2 << CAN_RX_PIN_NUM;		// Fast Speed
+	CAN_RX_PORT->OSPEEDR &= ~(3 << (CAN_RX_PIN_NUM*2));
+	CAN_RX_PORT->OSPEEDR |= 2 << (CAN_RX_PIN_NUM*2);		// Fast Speed
 
 	CAN_RX_PORT->AFR[CAN_RX_PIN_NUM >> 3] |= (uint32_t)9 << ((CAN_RX_PIN_NUM & 0x7)* 4);
 
 	// CAN TX GPIO configuration
-	CAN_TX_PORT->MODER &= ~(3 << CAN_TX_PIN_NUM);
-	CAN_TX_PORT->MODER |= 2 << CAN_TX_PIN_NUM;			// Alternate function
+	CAN_TX_PORT->MODER &= ~(3 << (CAN_TX_PIN_NUM * 2));
+	CAN_TX_PORT->MODER |= 2 << (CAN_TX_PIN_NUM * 2);			// Alternate function
 
 	CAN_TX_PORT->OTYPER &= CAN_TX_PIN;
-	CAN_TX_PORT->PUPDR &= ~(3 << CAN_TX_PIN_NUM);		// PullUp-PullDown
+	CAN_TX_PORT->PUPDR &= ~(3 << (CAN_TX_PIN_NUM * 2));		// PullUp-PullDown
 
-	CAN_TX_PORT->OSPEEDR &= ~(3 << CAN_TX_PIN_NUM);
-	CAN_TX_PORT->OSPEEDR |= 2 << CAN_TX_PIN_NUM;		// Fast Speed
+	CAN_TX_PORT->OSPEEDR &= ~(3 << (CAN_TX_PIN_NUM * 2));
+	CAN_TX_PORT->OSPEEDR |= 2 << (CAN_TX_PIN_NUM * 2);		// Fast Speed
 
 	CAN_RX_PORT->AFR[CAN_TX_PIN_NUM >> 3] |= (uint32_t)9 << ((CAN_TX_PIN_NUM & 0x7)* 4);
 

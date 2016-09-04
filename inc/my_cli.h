@@ -17,7 +17,7 @@
 #define SERVER_TCP_PRIO 		1
 #define CLIENT_TCP_PRIO 		2
 #define LOCAL_PORT					63180
-#define MQTT_PORT						1883
+#define MQTT_PORT						15508
 
 #define CONN_TIMEOUT				5000				// Таймаут для установки соединения
 
@@ -33,13 +33,13 @@
 /*Static IP ADDRESS: IP_ADDR0.IP_ADDR1.IP_ADDR2.IP_ADDR3 */
 #define LOCAL_IP0   192
 #define LOCAL_IP1  	168
-#define LOCAL_IP2  	11
+#define LOCAL_IP2  	12
 #define LOCAL_IP3 	7
 
 #define DEST_IP0		192
 #define DEST_IP1		168
-#define DEST_IP2		11
-#define DEST_IP3		13
+#define DEST_IP2		12
+#define DEST_IP3		4
 
 #define DEST_PORT		80
 
@@ -52,8 +52,8 @@
 /*Gateway Address*/
 #define GW0	   			192
 #define GW1   			168
-#define GW2   			11
-#define GW3   			1
+#define GW2   			12
+#define GW3   			4
 
 #define DNS0	   		77
 #define DNS1   			88

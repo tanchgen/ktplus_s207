@@ -65,12 +65,6 @@ void ETH_BSP_Config(void)
   /* Configure the EXTI for Ethernet link status. */
   Eth_Link_EXTIConfig();
   
-  /* Configure Systick clock source as HCLK */
-  SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK);
-
-  /* SystTick configuration: an interrupt every 10ms */
-  RCC_GetClocksFreq(&RCC_Clocks);
-  SysTick_Config(RCC_Clocks.HCLK_Frequency / 100);  
 }
 
 /**
@@ -366,8 +360,8 @@ void Eth_Link_EXTIConfig(void)
   /* Enable and set the EXTI interrupt to the highest priority */
   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);  
   NVIC_InitStructure.NVIC_IRQChannel = EXTI3_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
 }

@@ -30,7 +30,7 @@
 
 #define MAX_PACKET_SIZE 128
 
-#define KEEPALIVE 5000
+#define KEEPALIVE 50000
 
 
 typedef struct Mqtt Mqtt;

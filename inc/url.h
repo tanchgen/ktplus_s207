@@ -10,7 +10,7 @@
 
 // #define URL "tangens.ddns.net"
 
-#define URL "192.168.11.13"
-
+//#define URL "192.168.11.13"
+#define URL "m21.cloudmqtt.com"
 
 #endif /* URL_H_ */

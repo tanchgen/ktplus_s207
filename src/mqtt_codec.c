@@ -14,7 +14,7 @@
 //#include "time.h"
 #include "my_time.h"
 
-extern uint32_t s207Id;
+//extern uint32_t s207Id;
 
 #define PARAM_NB		12
 const struct _param {
@@ -69,7 +69,7 @@ uint16_t mqttTopDecod( CanTxMsg *txMsg, uint8_t top[], uint16_t topLen) {
 	}
 	canId.adjCur = ADJ;
 	txMsg->ExtId = setIdList( &canId );
-	txMsg->IDE = 1;
+	txMsg->IDE = CAN_Id_Extended;
 	txMsg->RTR = 0;
 	txMsg->StdId = 0;
 
@@ -154,6 +154,10 @@ uint8_t mqttTopCoder( uint8_t * top, CanTxMsg * can ){
 		pos += param[hot].len+1;
 		top += param[hot].len;
 		*top++ = '/';
+		msgId += 3;
+	}
+	else {
+		msgId = 1;
 	}
 	memcpy( top, param[msgId].name, param[msgId].len );
 	pos += param[msgId].len;

@@ -26,6 +26,7 @@
 #include "lwip/tcp.h"
 #include "my_cli.h"
 #include "can.h"
+#include "my_time.h"
 #include "mqttApp.h"
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,7 +58,7 @@ int main(void)
        system_stm32f2xx.c file
      */  
 	systickConfig();
-
+	timeInit();
 	canBufferInit();
 
   // At this stage the system clock should have already been configured
@@ -71,6 +72,7 @@ int main(void)
   /* Initilaize the LwIP stack */
   LwIP_Init();
 //  lwip_init();
+
   cliPrevInit();
   dnsStart();
 	mqttAppInit();
@@ -80,7 +82,7 @@ int main(void)
   {  
   	canProcess();
   	cliProcess();
-    /* check if any packet received */
+   /* check if any packet received */
     if (ETH_CheckFrameReceived())
     { 
       /* process received ethernet packet */
@@ -134,7 +136,7 @@ void genericError( tGenErr err){
 			{}
 			break;
 		default:
-			Delay(5000);
+			myDelay(5000);
 			NVIC_SystemReset();
 	}
 }
