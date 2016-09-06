@@ -24,6 +24,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f2xx_it.h"
 #include "main.h"
+#include "can.h"
 #include "my_time.h"
 
 /* Private typedef -----------------------------------------------------------*/

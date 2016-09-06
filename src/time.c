@@ -26,7 +26,11 @@ volatile uint32_t usCountDown;
 
 void rtc_Init(void)
 {
-    // Включим тактирование PWR
+	uint8_t lse = TRUE;
+  uint32_t Sync = 0xff;   // 15 бит
+  uint32_t Async = 0x7f;  // 7 бит
+
+  // Включим тактирование PWR
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
 
     // Разрешим доступ к управляющим регистрам энергонезависимого домена (для BKP)
@@ -35,13 +39,6 @@ void rtc_Init(void)
     // Если часы запущены, делать тут нечего.
 //    if(RTC->ISR & RTC_ISR_INITS) return;
 
-/*
-    // Запускаем LSI:
-    RCC->CSR |= RCC_CSR_LSION;
-
-    // Ждём, когда он заведётся
-    while(!(RCC->CSR & RCC_CSR_LSIRDY)) {}
-*/
 
     // Ок, генератор на 32 кГц завёлся.
 
@@ -52,12 +49,28 @@ void rtc_Init(void)
     // Запускаем LSE:
     RCC->BDCR |= RCC_BDCR_LSEON;
 
+    uint8_t tmp = myTick + 100;
     // Ждём, когда он заведётся
-    while(!(RCC->BDCR & RCC_BDCR_LSERDY)) {}
+    while(!(RCC->BDCR & RCC_BDCR_LSERDY)) {
+    	if( tmp < myTick ){
+        // Запускаем LSI:
+        RCC->CSR |= RCC_CSR_LSION;
+        // Ждём, когда он заведётся
+        while(!(RCC->CSR & RCC_CSR_LSIRDY))
+        {}
+        lse = FALSE;
+    		break;
+    	}
+    }
 
     // Выберем его как источник тактирования RTC:
     RCC->BDCR &= ~RCC_BDCR_RTCSEL; // сбросим
-    RCC->BDCR |= (RCC_BDCR_RTCSEL_0); // запишем 0b10
+    if (lse){
+    	RCC->BDCR |= (RCC_BDCR_RTCSEL_0); // запишем 0b10
+    }
+    else {
+    	RCC->BDCR |= (RCC_BDCR_RTCSEL_1); // запишем 0b10
+    }
 
     // Включим тактирование RTC
     RCC->BDCR |= RCC_BDCR_RTCEN;
@@ -66,45 +79,36 @@ void rtc_Init(void)
     RTC->WPR = 0xCA;
     RTC->WPR = 0x53;
     {
-        // Здесь можем менять регистры RTC
+      // Здесь можем менять регистры RTC
 
-        // Войдём в режим инициализации:
-        RTC->ISR |= RTC_ISR_INIT;
+      // Войдём в режим инициализации:
+      RTC->ISR |= RTC_ISR_INIT;
 
-        // Ждём, когда это произойдёт
-        while(!(RTC->ISR & RTC_ISR_INITF)) {}
+      // Ждём, когда это произойдёт
+      while(!(RTC->ISR & RTC_ISR_INITF)) {}
 
-        // Часы остановлены. Режим инициализации
-        // Настроим предделитель для получения частоты 1 Гц.
+      // Часы остановлены. Режим инициализации
+      // Настроим предделитель для получения частоты 1 Гц.
 
-/*
-        // LSI:
-        {
-            uint32_t Sync = 249;   // 15 бит
-            uint32_t Async = 127;  // 7 бит
-
-            // Сначала записываем величину для синхронного предделителя
-            RTC->PRER = Sync;
-
-            // Теперь добавим для асинхронного предделителя
-            RTC->PRER = Sync | (Async << 16);
-        }
-*/
+      if (lse){
         // LSE: нужно разделить на 0x7fff (кварцы так точно рассчитаны на это)
-        {
-            uint32_t Sync = 0xff;   // 15 бит
-            uint32_t Async = 0x7f;  // 7 бит
+        Sync = 0xff;   // 15 бит
+        Async = 0x7f;  // 7 бит
+      }
+      else {
+      // LSI:
+        Sync = 249;   // 15 бит
+        Async = 127;  // 7 бит
+      }
+      // Сначала записываем величину для синхронного предделителя
+      RTC->PRER = Sync;
+      // Теперь добавим для асинхронного предделителя
+      RTC->PRER = Sync | (Async << 16);
 
-            // Сначала записываем величину для синхронного предделителя
-            RTC->PRER = Sync;
-
-            // Теперь добавим для асинхронного предделителя
-            RTC->PRER = Sync | (Async << 16);
-        }
-        // Инициализация закончилась
-        RTC->ISR &= ~RTC_ISR_INIT;
+      // Инициализация закончилась
+      RTC->ISR &= ~RTC_ISR_INIT;
     }
-    /* Disable the write protection for RTC registers */
+    // Disable the write protection for RTC registers
     RTC->WPR = 0xFF;
 
     // Всё, часы запустились и считают время.
