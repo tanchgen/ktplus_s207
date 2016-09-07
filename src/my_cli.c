@@ -10,7 +10,7 @@
 #include "lwip/dns.h"
 #include "sntp.h"
 #include "string.h"
-#include "url.h"
+#include "name.h"
 #include "lwip/timers.h"
 #include "mqtt.h"
 #include "mqttApp.h"
@@ -114,7 +114,7 @@ void cliProcess( void ) {
 		case NET_OK:
 		case NAME_RESOLVING:
 			break;
-
+		case IP_ADDR_SET:
 		case NAME_NOT_RESOLVED:
 			neth.connCount = 10;
 			dnsStart();

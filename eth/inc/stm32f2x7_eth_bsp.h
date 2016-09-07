@@ -36,14 +36,14 @@
 #define DP83848_PHY_ADDRESS       0x01 /* Relative to STM322xG-EVAL Board */
 
 /* Specific defines for EXTI line, used to manage Ethernet link status */
-#define ETH_LINK_EXTI_LINE             EXTI_Line3
-#define ETH_LINK_EXTI_PORT_SOURCE      EXTI_PortSourceGPIOA
-#define ETH_LINK_EXTI_PIN_SOURCE       EXTI_PinSource3
-#define ETH_LINK_EXTI_IRQn             EXTI3_IRQn 
+#define ETH_LINK_EXTI_LINE             EXTI_Line14
+#define ETH_LINK_EXTI_PORT_SOURCE      EXTI_PortSourceGPIOB
+#define ETH_LINK_EXTI_PIN_SOURCE       EXTI_PinSource14
+#define ETH_LINK_EXTI_IRQn             EXTI15_10_IRQn 
 /* PB14 */
-#define ETH_LINK_PIN                   GPIO_Pin_3
-#define ETH_LINK_GPIO_PORT             GPIOA
-#define ETH_LINK_GPIO_CLK              RCC_AHB1Periph_GPIOA
+#define ETH_LINK_PIN                   GPIO_Pin_14
+#define ETH_LINK_GPIO_PORT             GPIOB
+#define ETH_LINK_GPIO_CLK              RCC_AHB1Periph_GPIOB
 /* PHY registers */
 #define PHY_MICR                  0x11 /* MII Interrupt Control Register */
 #define PHY_MICR_INT_EN           ((uint16_t)0x0002) /* PHY Enable interrupts */
@@ -55,9 +55,7 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void  ETH_BSP_Config(void);
-uint32_t Eth_Link_PHYITConfig(uint16_t PHYAddress);
-void Eth_Link_EXTIConfig(void);
-void Eth_Link_ITHandler(uint16_t PHYAddress);
+
 
 #ifdef __cplusplus
 }

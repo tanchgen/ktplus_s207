@@ -1,6 +1,6 @@
 /**
  * @file
- * Ethernet Interface for standalone applications (without RTOS) - works only for
+ * Ethernet Interface for standalone applications (without RTOS) - works only for 
  * ethernet polling mode (polling for ethernet frame reception)
  *
  */
@@ -41,11 +41,11 @@
 #include "netif/etharp.h"
 #include "ethernetif.h"
 #include "stm32f2x7_eth.h"
-#include "my_cli.h"
+#include "main.h"
 #include <string.h>
 
 /* Network interface name */
-#define IFNAME0 's'
+#define IFNAME0 'j'
 #define IFNAME1 't'
 
 
@@ -53,10 +53,10 @@
 extern ETH_DMADESCTypeDef  DMARxDscrTab[ETH_RXBUFNB], DMATxDscrTab[ETH_TXBUFNB];
 
 /* Ethernet Driver Receive buffers  */
-extern uint8_t Rx_Buff[ETH_RXBUFNB][ETH_RX_BUF_SIZE];
+extern uint8_t Rx_Buff[ETH_RXBUFNB][ETH_RX_BUF_SIZE]; 
 
 /* Ethernet Driver Transmit buffers */
-extern uint8_t Tx_Buff[ETH_TXBUFNB][ETH_TX_BUF_SIZE];
+extern uint8_t Tx_Buff[ETH_TXBUFNB][ETH_TX_BUF_SIZE]; 
 
 /* Global pointers to track current transmit and receive descriptors */
 extern ETH_DMADESCTypeDef  *DMATxDescToSet;
@@ -78,7 +78,7 @@ extern ETH_DMA_Rx_Frame_infos *DMA_RX_FRAME_infos;
 static void low_level_init(struct netif *netif)
 {
 #ifdef CHECKSUM_BY_HARDWARE
-  int i;
+  int i; 
 #endif
   /* set MAC hardware address length */
   netif->hwaddr_len = ETHARP_HWADDR_LEN;
@@ -91,8 +91,8 @@ static void low_level_init(struct netif *netif)
   netif->hwaddr[4] =  MAC_ADDR4;
   netif->hwaddr[5] =  MAC_ADDR5;
   
-  /* initialize MAC address in ethernet MAC */
-  ETH_MACAddressConfig(ETH_MAC_Address0, netif->hwaddr);
+  /* initialize MAC address in ethernet MAC */ 
+  ETH_MACAddressConfig(ETH_MAC_Address0, netif->hwaddr); 
 
   /* maximum transfer unit */
   netif->mtu = 1500;
@@ -144,16 +144,16 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
   u8 *buffer =  (u8 *)(DMATxDescToSet->Buffer1Addr);
   
   /* copy frame from pbufs to driver buffers */
-  for(q = p; q != NULL; q = q->next)
+  for(q = p; q != NULL; q = q->next) 
   {
     memcpy((u8_t*)&buffer[framelength], q->payload, q->len);
 	framelength = framelength + q->len;
   }
   
-  /* Note: padding and CRC for transmitted frame
+  /* Note: padding and CRC for transmitted frame 
      are automatically inserted by DMA */
 
-  /* Prepare transmit descriptors to give to DMA*/
+  /* Prepare transmit descriptors to give to DMA*/ 
   ETH_Prepare_Transmit_Descriptors(framelength);
 
   return ERR_OK;
@@ -176,8 +176,8 @@ static struct pbuf * low_level_input(struct netif *netif)
   u8 *buffer;
   uint32_t i=0;
   __IO ETH_DMADESCTypeDef *DMARxNextDesc;
-
-
+  
+  
   p = NULL;
   
   /* get received frame */
@@ -186,7 +186,7 @@ static struct pbuf * low_level_input(struct netif *netif)
   /* Obtain the size of the packet and put it into the "len" variable. */
   len = frame.length;
   buffer = (u8 *)frame.buffer;
-
+  
   /* We allocate a pbuf chain of pbufs from the Lwip buffer pool */
   p = pbuf_alloc(PBUF_RAW, len, PBUF_POOL);
   
@@ -197,7 +197,7 @@ static struct pbuf * low_level_input(struct netif *netif)
     {
       memcpy((u8_t*)q->payload, (u8_t*)&buffer[l], q->len);
       l = l + q->len;
-    }
+    }    
   }
   
   /* Release descriptors to DMA */
@@ -210,19 +210,19 @@ static struct pbuf * low_level_input(struct netif *netif)
   {
     DMARxNextDesc = frame.descriptor;
   }
-
+  
   /* Set Own bit in Rx descriptors: gives the buffers back to DMA */
   for (i=0; i<DMA_RX_FRAME_infos->Seg_Count; i++)
-  {
+  {  
     DMARxNextDesc->Status = ETH_DMARxDesc_OWN;
     DMARxNextDesc = (ETH_DMADESCTypeDef *)(DMARxNextDesc->Buffer2NextDescAddr);
   }
-
+  
   /* Clear Segment_Count */
   DMA_RX_FRAME_infos->Seg_Count =0;
   
   /* When Rx Buffer unavailable flag is set: clear it and resume reception */
-  if ((ETH->DMASR & ETH_DMASR_RBUS) != (u32)RESET)
+  if ((ETH->DMASR & ETH_DMASR_RBUS) != (u32)RESET)  
   {
     /* Clear RBUS ETHERNET DMA flag */
     ETH->DMASR = ETH_DMASR_RBUS;
@@ -254,7 +254,7 @@ err_t ethernetif_input(struct netif *netif)
 
   /* entry point to the LwIP stack */
   err = netif->input(p, netif);
-
+  
   if (err != ERR_OK)
   {
     LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));

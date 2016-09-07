@@ -50,7 +50,7 @@ a lot of data that needs to be copied, this should be set high. */
 /* MEMP_NUM_PBUF: the number of memp struct pbufs. If the application
    sends a lot of data out of ROM (or other static memory), this
    should be set high. */
-#define MEMP_NUM_PBUF           100
+#define MEMP_NUM_PBUF           10
 /* MEMP_NUM_UDP_PCB: the number of UDP protocol control blocks. One
    per active UDP "connection". */
 #define MEMP_NUM_UDP_PCB        6
@@ -65,15 +65,15 @@ a lot of data that needs to be copied, this should be set high. */
 #define MEMP_NUM_TCP_SEG        12
 /* MEMP_NUM_SYS_TIMEOUT: the number of simulateously active
    timeouts. */
-#define MEMP_NUM_SYS_TIMEOUT    4
+#define MEMP_NUM_SYS_TIMEOUT    6
 
 
 /* ---------- Pbuf options ---------- */
 /* PBUF_POOL_SIZE: the number of buffers in the pbuf pool. */
-#define PBUF_POOL_SIZE          30
+#define PBUF_POOL_SIZE          12
 
 /* PBUF_POOL_BUFSIZE: the size of each pbuf in the pbuf pool. */
-#define PBUF_POOL_BUFSIZE       500
+#define PBUF_POOL_BUFSIZE       512
 
 
 /* ---------- TCP options ---------- */
@@ -88,7 +88,7 @@ a lot of data that needs to be copied, this should be set high. */
 #define TCP_MSS                 (1500 - 40)	  /* TCP_MSS = (Ethernet MTU - IP header size - TCP header size) */
 
 /* TCP sender buffer space (bytes). */
-#define TCP_SND_BUF             (3*TCP_MSS)
+#define TCP_SND_BUF             (4*TCP_MSS)
 
 /*  TCP_SND_QUEUELEN: TCP sender buffer space (pbufs). This must be at least
   as much as (2 * TCP_SND_BUF/TCP_MSS) for things to work. */
@@ -107,7 +107,7 @@ a lot of data that needs to be copied, this should be set high. */
 /* Define LWIP_DHCP to 1 if you want DHCP configuration of
    interfaces. DHCP is not implemented in lwIP 0.5.1, however, so
    turning this on does currently not work. */
-#define LWIP_DHCP               0
+#define LWIP_DHCP               1
 
 
 /* ---------- UDP options ---------- */

@@ -271,7 +271,7 @@ void ETH_StructInit(ETH_InitTypeDef* ETH_InitStruct)
 uint32_t ETH_Init(ETH_InitTypeDef* ETH_InitStruct, uint16_t PHYAddress)
 {
   uint32_t RegValue = 0, tmpreg = 0;
-  __IO uint32_t i = 0;
+//  __IO uint32_t i = 0;
   RCC_ClocksTypeDef  rcc_clocks;
   uint32_t hclk = 60000000;
   __IO uint32_t timeout = 0;
@@ -296,7 +296,7 @@ uint32_t ETH_Init(ETH_InitTypeDef* ETH_InitStruct, uint16_t PHYAddress)
   assert_param(IS_ETH_CONTROL_FRAMES(ETH_InitStruct->ETH_PassControlFrames));
   assert_param(IS_ETH_BROADCAST_FRAMES_RECEPTION(ETH_InitStruct->ETH_BroadcastFramesReception));
   assert_param(IS_ETH_DESTINATION_ADDR_FILTER(ETH_InitStruct->ETH_DestinationAddrFilter));
-//  assert_param(IS_ETH_PROMISCIOUS_MODE(ETH_InitStruct->ETH_PromiscuousMode));
+  assert_param(IS_ETH_PROMISCIOUS_MODE(ETH_InitStruct->ETH_PromiscuousMode));
   assert_param(IS_ETH_MULTICAST_FRAMES_FILTER(ETH_InitStruct->ETH_MulticastFramesFilter));  
   assert_param(IS_ETH_UNICAST_FRAMES_FILTER(ETH_InitStruct->ETH_UnicastFramesFilter));
   assert_param(IS_ETH_PAUSE_TIME(ETH_InitStruct->ETH_PauseTime));

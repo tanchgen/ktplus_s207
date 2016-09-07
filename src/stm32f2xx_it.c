@@ -145,14 +145,15 @@ void SysTick_Handler(void)
   */
 void EXTI3_IRQHandler(void)
 {
-  if(EXTI_GetITStatus(ETH_LINK_EXTI_LINE) != RESET)
+/*
+	if(EXTI_GetITStatus(ETH_LINK_EXTI_LINE) != RESET)
   {
     Eth_Link_ITHandler(DP83848_PHY_ADDRESS);
-    /* Clear interrupt pending bit */
+    // Clear interrupt pending bit
     EXTI_ClearITPendingBit(ETH_LINK_EXTI_LINE);
   }
+*/
 }
-#if 0
 /**
   * @brief  This function handles External line 10 interrupt request.
   * @param  None
@@ -160,14 +161,15 @@ void EXTI3_IRQHandler(void)
   */
 void EXTI15_10_IRQHandler(void)
 {
-  if(EXTI_GetITStatus(ETH_LINK_EXTI_LINE) != RESET)
+/*
+	if(EXTI_GetITStatus(ETH_LINK_EXTI_LINE) != RESET)
   {
     Eth_Link_ITHandler(DP83848_PHY_ADDRESS);
-    /* Clear interrupt pending bit */
+    // Clear interrupt pending bit
     EXTI_ClearITPendingBit(ETH_LINK_EXTI_LINE);
   }
+*/
 }
-#endif
 /******************************************************************************/
 /*                 STM32F2xx Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */

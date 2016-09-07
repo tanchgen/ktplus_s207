@@ -69,8 +69,11 @@
 
 /* The PHY status register value change from a PHY to another, so the user have 
    to update this value depending on the used external PHY */
-#define PHY_SR    ((uint16_t)16) /* Value for DP83848 PHY */
+/* #define PHY_SR    ((uint16_t)16) Value for DP83848 PHY */
 
+#define PHY_SR    ((uint16_t)16) /* Value for DP83848 PHY */
+   
+   
 /* The Speed and Duplex mask values change from a PHY to another, so the user
    have to update this value depending on the used external PHY */
 #define PHY_SPEED_STATUS            ((uint16_t)0x0002) /* Value for DP83848 PHY */

@@ -31,20 +31,21 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f2xx.h"
 #include "stm32f2x7_eth_bsp.h"
+#include "my_cli.h"
 #include "my_err.h"
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 
 //#define USE_LCD        /* enable LCD  */
-//#define USE_DHCP       /* enable DHCP, if disabled static address is used */
+#define USE_DHCP       /* enable DHCP, if disabled static address is used */
    
 /* Uncomment SERIAL_DEBUG to enables retarget of printf to  serial port (COM1 on STM32 evalboard) 
    for debug purpose */   
 //#define SERIAL_DEBUG
 
 /* MII and RMII mode selection, for STM322xG-EVAL Board(MB786) RevB ***********/
-#define RMII_MODE  1 // User have to provide the 50 MHz clock by soldering a 50 MHz
+//#define RMII_MODE  1 // User have to provide the 50 MHz clock by soldering a 50 MHz
                      // oscillator (ref SM7745HEV-50.0M or equivalent) on the U3
                      // footprint located under CN3 and also removing jumper on JP5. 
                      // This oscillator is not provided with the board. 
@@ -52,7 +53,7 @@
                      // board User manual (UM1057).
 
                                      
-//#define MII_MODE
+#define MII_MODE	1
 
 /* Uncomment the define below to clock the PHY from external 25MHz crystal (only for MII mode) */
 #ifdef 	MII_MODE

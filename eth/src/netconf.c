@@ -20,20 +20,18 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include <stdio.h>
-#include "stm32f2xx.h"
 #include "lwip/mem.h"
 #include "lwip/memp.h"
-#include "lwip/tcp.h"
 #include "lwip/tcp_impl.h"
+#include "lwip/tcp.h"
 #include "lwip/udp.h"
-#include "lwip/timers.h"
 #include "netif/etharp.h"
 #include "lwip/dhcp.h"
 #include "ethernetif.h"
 #include "my_cli.h"
+#include "main.h"
 #include "netconf.h"
-
+#include <stdio.h>
 
 /* Private typedef -----------------------------------------------------------*/
 #define MAX_DHCP_TRIES        4
@@ -58,11 +56,10 @@ uint32_t IPaddress = 0;
 uint32_t DHCPfineTimer = 0;
 uint32_t DHCPcoarseTimer = 0;
 DHCP_State_TypeDef DHCP_state = DHCP_START;
+#endif
 
 /* Private functions ---------------------------------------------------------*/
 void LwIP_DHCP_Process_Handle(void);
-#endif
-
 /**
   * @brief  Initializes the lwIP stack
   * @param  None
@@ -89,9 +86,9 @@ void LwIP_Init(void)
   netmask.addr = 0;
   gw.addr = 0;
 #else
-  IP4_ADDR(&ipaddr, LOCAL_IP0, LOCAL_IP1, LOCAL_IP2, LOCAL_IP3);
-  IP4_ADDR(&netmask, NETMASK0, NETMASK1 , NETMASK2, NETMASK3);
-  IP4_ADDR(&gw, GW0, GW1, GW2, GW3);
+  IP4_ADDR(&ipaddr, IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
+  IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1 , NETMASK_ADDR2, NETMASK_ADDR3);
+  IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
 
 #ifdef USE_LCD  
    iptab[0] = IP_ADDR3;
@@ -145,7 +142,6 @@ void LwIP_Pkt_Handle(void)
   */
 void LwIP_Periodic_Handle(__IO uint32_t localtime)
 {
-	sys_check_timeouts();
 #if LWIP_TCP
   /* TCP periodic process every 250 ms */
   if (localtime - TCPTimer >= TCP_TMR_INTERVAL)
@@ -171,7 +167,7 @@ void LwIP_Periodic_Handle(__IO uint32_t localtime)
     if ((DHCP_state != DHCP_ADDRESS_ASSIGNED)&&(DHCP_state != DHCP_TIMEOUT))
     { 
       /* toggle LED1 to indicate DHCP on-going process */
-      STM_EVAL_LEDToggle(LED1);
+//      STM_EVAL_LEDToggle(LED1);
       
       /* process DHCP state machine */
       LwIP_DHCP_Process_Handle();    
@@ -225,7 +221,7 @@ void LwIP_DHCP_Process_Handle()
       if (IPaddress!=0) 
       {
         DHCP_state = DHCP_ADDRESS_ASSIGNED;	
-
+        neth.netState = IP_ADDR_SET;
         /* Stop DHCP */
         dhcp_stop(&netif);
 
@@ -246,7 +242,7 @@ void LwIP_DHCP_Process_Handle()
         LCD_DisplayStringLine(Line8, (uint8_t*)"  by a DHCP server  ");
         LCD_DisplayStringLine(Line9, iptxt);
 #endif
-        STM_EVAL_LEDOn(LED1);
+//        STM_EVAL_LEDOn(LED1);
       }
       else
       {
@@ -259,18 +255,20 @@ void LwIP_DHCP_Process_Handle()
           dhcp_stop(&netif);
 
           /* Static address used */
-          IP4_ADDR(&ipaddr, IP_ADDR0 ,IP_ADDR1 , IP_ADDR2 , IP_ADDR3 );
-          IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
-          IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+          IP4_ADDR(&ipaddr, LOCAL_IP0 ,LOCAL_IP1 , LOCAL_IP2 , LOCAL_IP3 );
+          IP4_ADDR(&netmask, NETMASK0, NETMASK1, NETMASK2, NETMASK3);
+          IP4_ADDR(&gw, GW0, GW1, GW2, GW3);
           netif_set_addr(&netif, &ipaddr , &netmask, &gw);
+
+          neth.netState = IP_ADDR_SET;
 
 #ifdef USE_LCD   
           LCD_DisplayStringLine(Line7, (uint8_t*)"    DHCP timeout    ");
 
-          iptab[0] = IP_ADDR3;
-          iptab[1] = IP_ADDR2;
-          iptab[2] = IP_ADDR1;
-          iptab[3] = IP_ADDR0;
+          iptab[0] = LOCAL_IP3;
+          iptab[1] = LOCAL_IP2;
+          iptab[2] = LOCAL_IP1;
+          iptab[3] = LOCAL_IP0;
 
           sprintf((char*)iptxt, "  %d.%d.%d.%d", iptab[3], iptab[2], iptab[1], iptab[0]); 
 
@@ -281,7 +279,7 @@ void LwIP_DHCP_Process_Handle()
           LCD_DisplayStringLine(Line8, (uint8_t*)"  Static IP address   ");
           LCD_DisplayStringLine(Line9, iptxt);         
 #endif    
-          STM_EVAL_LEDOn(LED1);
+//          STM_EVAL_LEDOn(LED1);
         }
       }
     }

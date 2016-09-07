@@ -17,7 +17,6 @@
 #define SERVER_TCP_PRIO 		1
 #define CLIENT_TCP_PRIO 		2
 #define LOCAL_PORT					63180
-#define MQTT_PORT						15508
 
 #define CONN_TIMEOUT				5000				// Таймаут для установки соединения
 
@@ -71,6 +70,7 @@
 
 typedef enum {
 	NET_OK,
+	IP_ADDR_SET,
 	NAME_RESOLVING,
 	NAME_RESOLVED,
 	NAME_NOT_RESOLVED,
