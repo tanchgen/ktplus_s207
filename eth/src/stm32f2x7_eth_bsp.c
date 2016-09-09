@@ -62,13 +62,14 @@ void ETH_BSP_Config(void)
 
   /* Configure the EXTI for Ethernet link status. */
   //Eth_Link_EXTIConfig();
-  
-  /* Configure Systick clock source as HCLK */
+/*
+  // Configure Systick clock source as HCLK
   SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK);
 
-  /* SystTick configuration: an interrupt every 10ms */
+  // SystTick configuration: an interrupt every 10ms
   RCC_GetClocksFreq(&RCC_Clocks);
   SysTick_Config(RCC_Clocks.HCLK_Frequency / 100);  
+*/
 }
 
 /**

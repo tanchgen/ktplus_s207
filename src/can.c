@@ -24,11 +24,11 @@ void canInit(void)
 	canBspInit();
 
 	CAN_DeInit(CAN_CAN);
-	CAN_InitStruct.CAN_Prescaler = 4;
+	CAN_InitStruct.CAN_Prescaler = 5;
 	CAN_InitStruct.CAN_Mode = CAN_Mode_Normal;
 	CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
-	CAN_InitStruct.CAN_BS1 = CAN_BS1_2tq;
-	CAN_InitStruct.CAN_BS2 = CAN_BS2_3tq;
+	CAN_InitStruct.CAN_BS1 = CAN_BS1_6tq;
+	CAN_InitStruct.CAN_BS2 = CAN_BS2_8tq;
 	CAN_InitStruct.CAN_TTCM = DISABLE;
 	CAN_InitStruct.CAN_ABOM = DISABLE;
 	CAN_InitStruct.CAN_AWUM = DISABLE;
@@ -104,16 +104,15 @@ void canFilterInit( void ){
 	canId.s207 = nS207_DEV;
 	canId.devId = 0x23ABCDEF;
 	// Фильтр принимаемых устройств
-	filter.idList = setIdList( &canId );
 #if CAN_TEST
 // Для тестирования в колбцевом режиме - маска = 0x00000000
+	filter.ideList = 0;
 	filter.idMask = 0;
 #else
+	filter.idList = setIdList( &canId );
 	filter.idMask = S207_MASK;
 #endif
 
-	filter.ideList = 0;
-	filter.ideMask = 0;
 	filter.rtrList = 0;
 	filter.rtrMask = 0;
 

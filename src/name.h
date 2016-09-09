@@ -16,8 +16,8 @@
 #define MQTT_PORT			10139
 
 
-#define		USERNAME		"bpmdvqew"
-#define		PASSWORD		"KUS2gdM59OEY"
+//#define		USERNAME		"bpmdvqew"
+//#define		PASSWORD		"KUS2gdM59OEY"
 
 
 #endif /* NAME_H_ */

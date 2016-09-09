@@ -10,15 +10,15 @@
 
 #include "stm32f2xx_conf.h"
 
-#define CAN_RX_PIN 						GPIO_Pin_8
-#define CAN_RX_PIN_NUM				8
-#define CAN_RX_PORT 					GPIOB
+#define CAN_RX_PIN 						GPIO_Pin_0
+#define CAN_RX_PIN_NUM				0
+#define CAN_RX_PORT 					GPIOD
 
-#define CAN_TX_PIN 						GPIO_Pin_9
-#define CAN_TX_PIN_NUM				9
-#define CAN_TX_PORT 					GPIOB
+#define CAN_TX_PIN 						GPIO_Pin_1
+#define CAN_TX_PIN_NUM				1
+#define CAN_TX_PORT 					GPIOD
 
-#define CAN_RCC_GPIOEN 				RCC_AHB1ENR_GPIOBEN
+#define CAN_RCC_GPIOEN 				RCC_AHB1ENR_GPIODEN
 
 
 #define CAN_RCC_CAN 									RCC_APB1Periph_CAN1

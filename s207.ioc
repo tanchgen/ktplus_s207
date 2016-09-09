@@ -1,7 +1,10 @@
 #MicroXplorer Configuration settings - do not modify
-CAN1.CalculateTimeBit=1600
-CAN1.CalculateTimeQuantum=533.3333333333334
-CAN1.IPParameters=CalculateTimeQuantum,CalculateTimeBit
+CAN1.BS1=CAN_BS1_6TQ
+CAN1.BS2=CAN_BS2_8TQ
+CAN1.CalculateTimeBit=2500
+CAN1.CalculateTimeQuantum=166.66666666666669
+CAN1.IPParameters=CalculateTimeQuantum,CalculateTimeBit,Prescaler,BS1,BS2
+CAN1.Prescaler=5
 ETH.IPParameters=MediaInterface
 ETH.MediaInterface=ETH_MEDIA_INTERFACE_RMII
 File.Version=5
