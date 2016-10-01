@@ -59,38 +59,41 @@ int main(void)
        system_stm32f2xx.c file
      */  
 	systickConfig();
+/*
 	timeInit();
-	canBufferInit();
+*/
+//	canBufferInit();
 
   // At this stage the system clock should have already been configured
   // at high speedreadBuff.
 	canInit();
   // Infinite loop
-
-	/* Configure ethernet (GPIOs, clocks, MAC, DMA) */
+/*
+	// Configure ethernet (GPIOs, clocks, MAC, DMA)
   ETH_BSP_Config();
     
-  /* Initilaize the LwIP stack */
+  // Initilaize the LwIP stack
   LwIP_Init();
-//  lwip_init();
 
   cliPrevInit();
   dnsStart();
 	mqttAppInit();
-
-  /* Infinite loop */
+*/
+  // Infinite loop
   while (1)
   {  
   	canProcess();
+/*
   	cliProcess();
-   /* check if any packet received */
+   // check if any packet received
     if (ETH_CheckFrameReceived())
     { 
-      /* process received ethernet packet */
+      // process received ethernet packet
       LwIP_Pkt_Handle();
     }
-    /* handle periodic timers for LwIP */
+    // handle periodic timers for LwIP
     LwIP_Periodic_Handle(LocalTime);
+*/
   }   
 }
 

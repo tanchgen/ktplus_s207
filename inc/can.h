@@ -58,6 +58,15 @@ typedef struct CanMessageStruct
 #define S207_MASK				(uint32_t)0x00100000
 #define DEV_ID_MASK			(uint32_t)0x000FFFFF
 
+/*
+#define CUR_ADJ_MASK				(uint32_t)0x00000400				// 11 (Старший) бит в StdId
+#define MSG_ID_MASK					(uint32_t)0x000003F0				// 10-5 биты StdId
+#define COLD_HOT_MASK				(uint32_t)0x00000008				// 4 бит StdId
+#define S207_MASK						(uint32_t)0x00000004				// 3 бит StdId
+#define DEV_ID_HI_BIT_MASK	(uint32_t)0x00000003				// 2-1 биты StdId - 18 и 19 биты DEV_ID
+#define DEV_ID_LOW_BIT_MASK	(uint32_t)0x1FFFF800				// 28-12 биты StdId- с 0-го по 17-й биты DEV_ID
+*/
+
 #define S207_DEV				(uint8_t)0x1				// Поле признака S207-устройства
 #define nS207_DEV				(uint8_t)0x0				// Поле признака НЕ-S207 - устройство
 
@@ -85,8 +94,8 @@ typedef enum {				// Действующее-Задаваемое
 
 typedef enum {							// Условный номер сообщения
 	NULL_MES = 0,
-	TO_IN = 1,								// Входящая температура
-	TO_OUT,										// Выходящая температура
+	TO_IN_MSG = 1,								// Входящая температура
+	TO_OUT_MSG,										// Выходящая температура
 	VALVE_DEG,								// Угол поворота задвижки
 	FLOW,											// Значение потока - показания расходомера
 	POWER_SEC,								// Тепловая работа в сек
@@ -138,5 +147,9 @@ void canRx1IrqHandler(void);
 void canTxIrqHandler(void);
 void canSceIrqHandler(void);
 
+void canSendMsg( eMessId msgId, eCurAdj cur, uint32_t data );
+
 uint32_t setIdList( tCanId *canid );
+uint32_t getDevId( uint32_t canExtId );
+
 #endif /* CAN_H_ */

@@ -11,6 +11,8 @@
 #include "buffer.h"
 
 uint8_t devId;
+extern __IO uint32_t secondFlag;
+//extern __IO uint32_t LocalTime; /* this variable is used to create a time reference incremented by 10ms */
 
 void canInit(void)
 {
@@ -24,11 +26,11 @@ void canInit(void)
 	canBspInit();
 
 	CAN_DeInit(CAN_CAN);
-	CAN_InitStruct.CAN_Prescaler = 5;
+	CAN_InitStruct.CAN_Prescaler = 15;
 	CAN_InitStruct.CAN_Mode = CAN_Mode_Normal;
 	CAN_InitStruct.CAN_SJW = CAN_SJW_1tq;
-	CAN_InitStruct.CAN_BS1 = CAN_BS1_6tq;
-	CAN_InitStruct.CAN_BS2 = CAN_BS2_8tq;
+	CAN_InitStruct.CAN_BS1 = CAN_BS1_4tq;
+	CAN_InitStruct.CAN_BS2 = CAN_BS2_3tq;
 	CAN_InitStruct.CAN_TTCM = DISABLE;
 	CAN_InitStruct.CAN_ABOM = DISABLE;
 	CAN_InitStruct.CAN_AWUM = DISABLE;
@@ -73,7 +75,8 @@ void canBspInit( void ){
 	CAN_RX_PORT->MODER |= 2 << (CAN_RX_PIN_NUM*2);			// Alternate function
 
 	CAN_RX_PORT->OTYPER &= CAN_RX_PIN;
-	CAN_RX_PORT->PUPDR &= ~(3 << (CAN_RX_PIN_NUM*2));		// PullUp-PullDown
+	CAN_RX_PORT->PUPDR &= ~(3 << (CAN_RX_PIN_NUM*2));		// No PullUp - No PullDown
+	CAN_RX_PORT->PUPDR |= (1 << (CAN_RX_PIN_NUM*2));		// PullUp
 
 	CAN_RX_PORT->OSPEEDR &= ~(3 << (CAN_RX_PIN_NUM*2));
 	CAN_RX_PORT->OSPEEDR |= 2 << (CAN_RX_PIN_NUM*2);		// Fast Speed
@@ -86,6 +89,7 @@ void canBspInit( void ){
 
 	CAN_TX_PORT->OTYPER &= CAN_TX_PIN;
 	CAN_TX_PORT->PUPDR &= ~(3 << (CAN_TX_PIN_NUM * 2));		// PullUp-PullDown
+	CAN_RX_PORT->PUPDR |= (1 << (CAN_TX_PIN_NUM*2));		// PullUp
 
 	CAN_TX_PORT->OSPEEDR &= ~(3 << (CAN_TX_PIN_NUM * 2));
 	CAN_TX_PORT->OSPEEDR |= 2 << (CAN_TX_PIN_NUM * 2);		// Fast Speed
@@ -98,11 +102,11 @@ void canFilterInit( void ){
 	tFilter filter;
 	tCanId canId;
 
-	canId.adjCur = ADJ;
-	canId.coldHot = COLD;
+	canId.adjCur = CUR;
+	canId.coldHot = HOT;
 	canId.msgId = NULL_MES;
 	canId.s207 = nS207_DEV;
-	canId.devId = 0x23ABCDEF;
+	canId.devId = 0xFFF55;
 	// Фильтр принимаемых устройств
 #if CAN_TEST
 // Для тестирования в колбцевом режиме - маска = 0x00000000
@@ -113,12 +117,33 @@ void canFilterInit( void ){
 	filter.idMask = S207_MASK;
 #endif
 
+	filter.ideList = 1;
+	filter.ideMask = 1;
 	filter.rtrList = 0;
 	filter.rtrMask = 0;
 
 	canFilterUpdate( &filter );
 }
 
+void canFilterUpdate( tFilter * filter ) {
+	CAN_FilterInitTypeDef CAN_FilterInitStruct;
+
+	filter->idList <<= 0x3;
+	CAN_FilterInitStruct.CAN_FilterIdHigh = (filter->idList >> 16) & 0xFFFF;
+	CAN_FilterInitStruct.CAN_FilterIdLow = (filter->idList & 0xFFFF) | (filter->ideList << 2) | (filter->rtrList << 1);
+	filter->idMask <<= 0x3;
+	CAN_FilterInitStruct.CAN_FilterMaskIdHigh = (filter->idMask >> 16) & 0xFFFF;
+	CAN_FilterInitStruct.CAN_FilterMaskIdLow = (filter->idMask & 0xFFFF) | (filter->ideMask << 2) | (filter->rtrMask << 1);
+
+	CAN_FilterInitStruct.CAN_FilterFIFOAssignment = CAN_Filter_FIFO0;
+	CAN_FilterInitStruct.CAN_FilterNumber = 0;
+	CAN_FilterInitStruct.CAN_FilterMode = CAN_FilterMode_IdMask;
+	CAN_FilterInitStruct.CAN_FilterScale = CAN_FilterScale_32bit;
+	CAN_FilterInitStruct.CAN_FilterActivation = ENABLE;
+	CAN_FilterInit(&CAN_FilterInitStruct);
+}
+
+/*
 void canFilterUpdate( tFilter * filter ) {
 	CAN_FilterInitTypeDef CAN_FilterInitStruct;
 	uint16_t stdId;
@@ -141,7 +166,7 @@ void canFilterUpdate( tFilter * filter ) {
 	CAN_FilterInit(&CAN_FilterInitStruct);
 
 }
-
+*/
 
 void canRx0IrqHandler(void) {
 	CanRxMsg RxMessage;
@@ -195,13 +220,30 @@ void canSceIrqHandler(void) {
 }
 
 void canProcess( void ){
+
+// Эмуляция приема CAN-сообщения
+	if( secondFlag ){
+		secondFlag = FALSE;
+		/*
+		// Каждые 15 сек отправляем в Интернет
+		if( !(LocalTime % 15000) ){
+			canSendMsg( FLOW, CUR, 184 );
+			canSendMsg( TO_IN_MSG, CUR, 1280 );
+			canSendMsg( TO_OUT_MSG, CUR, 912 );
+		}
+		if( !(LocalTime % 2000) ){
+			canSendMsg( VALVE_DEG, ADJ, 20 );
+//			canSendMsg( TO_OUT_MSG, ADJ, 20 );
+		}
+		*/
+	}
+
   /* Select one empty transmit mailbox */
   if( ((CAN1->TSR&CAN_TSR_TME0) == CAN_TSR_TME0) ||
   		((CAN1->TSR&CAN_TSR_TME1) == CAN_TSR_TME1) ||
 			((CAN1->TSR&CAN_TSR_TME2) == CAN_TSR_TME2) ){
 
   	CanTxMsg txMessage;
-  	CanRxMsg rxMessage;
 
 //Читаем полученные сообщения, если они есть, и запихиваем его в буфер отправки.
   	if (  readBuff( &canTxBuf, (uint8_t *)&txMessage) ) {
@@ -214,3 +256,69 @@ void canProcess( void ){
   }
 
 }
+
+// Эмуляция приема CAN-сообщения
+
+void canSendMsg( eMessId msgId, eCurAdj cur, uint32_t data ) {
+	CanTxMsg canMsg;
+	tCanId canId;
+	const uint32_t selfDevId = 0xFFF55;
+	const uint32_t VlvDevId = 0xFFFAA;
+	// Формируем структуру canId
+
+	if( msgId == VALVE_DEG ){
+		// Если отправляем новое положение задвижки контроллеру задвижки
+// TODO: 	Идентификатор контроллера задвижки
+		canId.devId = VlvDevId;
+	}
+	else {
+		canId.devId = selfDevId;
+	}
+
+	if( cur == ADJ ){
+		canId.adjCur = ADJ;
+		canId.s207 = S207_DEV;
+	}
+	else {
+		canId.adjCur = CUR;
+		canId.s207 = nS207_DEV;
+	}
+	canId.msgId = msgId;
+	canId.coldHot = HOT;
+
+	if ( (msgId == TO_IN_MSG) || (msgId == TO_OUT_MSG) ) {
+		// Для температуры - данные 16-и битные со знаком
+		*((int16_t *)canMsg.Data) = *((int16_t *)&data);
+		canMsg.DLC = 2;
+	}
+	else {
+		// Для всех, кроме температуры, беззнаковое 32-х битное целое
+		*((uint32_t *)canMsg.Data) = data;
+		canMsg.DLC = 4;
+	}
+
+	canMsg.ExtId = setIdList( &canId );
+	canMsg.IDE = CAN_Id_Extended;
+	canMsg.RTR = 0;
+	canMsg.StdId = 0;
+
+	if( cur == ADJ ){
+		writeBuff( &canTxBuf, (uint8_t *)&canMsg );
+	}
+	else {
+		writeBuff( &canRxBuf, (uint8_t *)&canMsg );
+	}
+}
+
+uint32_t setIdList( tCanId *canid ){
+ return 	( (((canid->adjCur)<<28) & CUR_ADJ_MASK)	|
+		 	 	 	 	(((canid->msgId)<<22) & MSG_ID_MASK)		|
+						(((canid->coldHot)<<21) & COLD_HOT_MASK)|
+						(((canid->s207)<<20) & S207_MASK)				|
+						((canid->devId) & DEV_ID_MASK) );
+}
+
+uint32_t getDevId( uint32_t canExtId ){
+	return (canExtId & DEV_ID_MASK);
+}
+

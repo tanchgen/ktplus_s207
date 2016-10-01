@@ -18,7 +18,6 @@ int8_t mqttMsgDecod( CanTxMsg *can, uint8_t * msg, uint8_t len, eMessId messId )
 uint8_t mqttTopCoder( uint8_t * top, CanTxMsg * can );
 uint8_t mqttMsgCoder( uint8_t * msg, CanTxMsg * can );
 
-uint32_t setIdList( tCanId *canid );
 //int32_t atoi( uint8_t *str[] );
 //uint32_t atoul( uint8_t str[] );
 

@@ -39,7 +39,7 @@ void mqttAppMsgReceived(Mqtt *this, uint8_t *topic, uint8_t topicLen, uint8_t *d
 
 void mqttAppInit()
 {
-	char ivDevId[9];
+	char s207IdStr[9];
 	s207Id = *((uint32_t *)0x1FFF7A10);		// Uniq Device ID Register
 
 	// itoa
@@ -47,15 +47,15 @@ void mqttAppInit()
 
 	for ( int8_t i = 7; i >=0 ; i-- ) {
 		ch = ( s207Id % 16 ) + '0';
-		if ( ch > '9' ) ch += 7;
-		ivDevId[ i ] = ch;
+		if ( ch > '9' ) ch += 'A' - '0';
+		s207IdStr[ i ] = ch;
 		s207Id /= 16;
 	}
 
-	ivDevId[8] = '\0';
+	s207IdStr[8] = '\0';
 	ip_addr_t * destIp = (ip_addr_t *)&neth.destIp;
 
-	mqttInit(&mqtt, *destIp, neth.destPort, &mqttAppMsgReceived, ivDevId );
+	mqttInit(&mqtt, *destIp, neth.destPort, &mqttAppMsgReceived, s207IdStr );
 //	sys_timeout( MQTT_TMR_INTERVAL, mqttTimer, (void *)&neth);
 }
 
@@ -79,7 +79,7 @@ void mqttAppHandle( Mqtt * this )
 			uint8_t top[256];
 			uint8_t msg[256];
 			// Вносим корень топика (ID kt-s207)
-			uint8_t len = strlen( this->pubTopic );
+			uint8_t len = strlen( (char *)this->pubTopic );
 			memcpy( top, this->pubTopic, len );
 
 			mqttTopCoder( top+len, (CanTxMsg *)&rxCan );

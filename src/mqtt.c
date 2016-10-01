@@ -16,7 +16,7 @@
 
 extern volatile uint32_t LocalTime;
 
-void mqttSent( Mqtt * this );
+err_t mqttSent( void * arg,  struct tcp_pcb *tpcb, u16_t len);
 
 /**
  * Writes one character to an output buffer.
@@ -148,7 +148,6 @@ err_t recv_callback(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
 err_t accept_callback(void *arg, struct tcp_pcb *npcb, err_t err) {
 	LWIP_UNUSED_ARG(err);
   LWIP_UNUSED_ARG(arg);
-	Mqtt *this = arg;
 
     //flag++;
 
@@ -180,22 +179,22 @@ void mqttDisconnectForced(Mqtt *this)
 }
 
 
-void mqttInit(Mqtt *this, struct ip_addr serverIp, int port, msgReceived fn, char *devId){
+void mqttInit(Mqtt *this, struct ip_addr serverIp, int port, msgReceived fn, char *devIdStr){
 	this->msgReceivedCallback = fn;
 	//this->pcb = tcp_new();
 	this->server = serverIp;
 	this->port = port;
 	this->connected = 0;
 	memcpy(this->deviceId, "ktS207", 6);
-	memcpy(this->deviceId+6, devId+4, 4);
+	memcpy(this->deviceId+6, devIdStr+4, 4);
 
 	this->autoConnect = 0;
 	strcpy( this->username, USERNAME );
 	strcpy( this->password, PASSWORD );
-	strcpy( (char *)subsTop, devId);
+	strcpy( (char *)subsTop, devIdStr);
 	strcat( (char *)subsTop, "SU/#");
 	this->subsTopic = subsTop;
-	strcpy( (char *)pubTop, devId);
+	strcpy( (char *)pubTop, devIdStr);
 	strcat( (char *)pubTop, "PB");
 	this->pubTopic = pubTop;
 	this->mqttPackId = 1;
@@ -532,10 +531,14 @@ uint8_t mqttLive(Mqtt *this) {
   return 0;
 }
 
-void mqttSent( Mqtt * this ){
+err_t mqttSent( void * arg ,  struct tcp_pcb *tpcb, u16_t len){
+	(void) tpcb;
+	(void) len;
+	Mqtt * this = arg;
 	if( ((struct ip_addr)this->pcb->remote_ip).addr == this->server.addr ){
 		mqtt.connTout = LocalTime + CONN_TIMEOUT*6;
 	}
+	return ERR_OK;
 }
 
 /*

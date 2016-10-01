@@ -110,10 +110,10 @@ static uint8_t topicParse( uint8_t * top, uint8_t * level, tCanId * canId ){
  * Возвращает количество сформированных CAN-пакетов
  */
 int8_t mqttMsgDecod( CanTxMsg *can, uint8_t * msg, uint8_t len, eMessId messId ){
-
+	(void)len;
 	switch( messId ){
-		case TO_IN:
-		case TO_OUT:
+		case TO_IN_MSG:
+		case TO_OUT_MSG:
 			*((int16_t *)can->Data) = (int16_t)(atof((char *)msg) * 16);
 			can->DLC = 2;
 			break;
@@ -139,7 +139,7 @@ uint8_t mqttTopCoder( uint8_t * top, CanTxMsg * can ){
 	pos++;
 
 	// Идентификатор устройства, передавшего сообщение - в топик
-	len = hlToStr( (can->ExtId & DEV_ID_MASK), &ptmp );
+	len = hlToStr( getDevId(can->ExtId), &ptmp );
 	for( uint8_t i = len; i < 8; i++) {
 		*top++ = '0';
 	}
@@ -172,7 +172,7 @@ uint8_t mqttMsgCoder( uint8_t * msg, CanTxMsg *can) {
 	uint8_t len;
 
 	msgId = (can->ExtId & MSG_ID_MASK) >> 22;
-	if( (msgId == TO_IN) || (msgId == TO_OUT) ) {
+	if( (msgId == TO_IN_MSG) || (msgId == TO_OUT_MSG) ) {
 		// Теперь название и значение параметра
 		fToStr( (float)*((int16_t *)can->Data)/16, msg, 6 );
 		len = strlen( (char *)msg );
@@ -183,14 +183,6 @@ uint8_t mqttMsgCoder( uint8_t * msg, CanTxMsg *can) {
 	return len;
 }
 
-
-uint32_t setIdList( tCanId *canid ){
- return 	( (((canid->adjCur)<<28) & CUR_ADJ_MASK)	|
-		 	 	 	 	(((canid->msgId)<<22) & MSG_ID_MASK)		|
-						(((canid->coldHot)<<21) & COLD_HOT_MASK)|
-						(((canid->s207)<<20) & S207_MASK)				|
-						((canid->devId) & DEV_ID_MASK) );
-}
 /*
 int32_t hexToL( uint32_t *devId, uint8_t *pStr, uint16_t len ){
 	uint32_t id = 0;
