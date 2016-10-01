@@ -32,12 +32,12 @@
 /*Static IP ADDRESS: IP_ADDR0.IP_ADDR1.IP_ADDR2.IP_ADDR3 */
 #define LOCAL_IP0   192
 #define LOCAL_IP1  	168
-#define LOCAL_IP2  	12
+#define LOCAL_IP2  	11
 #define LOCAL_IP3 	7
 
 #define DEST_IP0		192
 #define DEST_IP1		168
-#define DEST_IP2		12
+#define DEST_IP2		11
 #define DEST_IP3		4
 
 #define DEST_PORT		80
@@ -51,8 +51,8 @@
 /*Gateway Address*/
 #define GW0	   			192
 #define GW1   			168
-#define GW2   			12
-#define GW3   			4
+#define GW2   			11
+#define GW3   			1
 
 #define DNS0	   		77
 #define DNS1   			88
@@ -110,9 +110,7 @@ typedef struct {
 	struct pbuf	* rxPbuf;							// Указатель на начальный PBUF приема
 	uint16_t pbufOffset;							// Сдвиг в цепочке PBUF до начала неперенесенных в rxTmpBuf данных
 */
-	uint32_t connTout;
 	tNetState netState;
-	uint8_t connCount;
 } tNeth;
 
 

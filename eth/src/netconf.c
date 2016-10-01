@@ -31,6 +31,7 @@
 #include "my_cli.h"
 #include "main.h"
 #include "netconf.h"
+#include "lwip/timers.h"
 #include <stdio.h>
 
 /* Private typedef -----------------------------------------------------------*/
@@ -148,6 +149,7 @@ void LwIP_Periodic_Handle(__IO uint32_t localtime)
   {
     TCPTimer =  localtime;
     tcp_tmr();
+    sys_check_timeouts();
   }
 #endif
   

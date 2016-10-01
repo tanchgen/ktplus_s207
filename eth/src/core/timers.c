@@ -214,8 +214,17 @@ dns_timer(void *arg)
 {
   LWIP_UNUSED_ARG(arg);
   LWIP_DEBUGF(TIMERS_DEBUG, ("tcpip: dns_tmr()\n"));
-  dns_tmr();
-  sys_timeout(DNS_TMR_INTERVAL, dns_timer, NULL);
+/*
+  if(neth.netState == NAME_RESOLVING){
+  	neth.netState = NAME_NOT_RESOLVED;
+  }
+  else {
+  	dns_tmr();
+  	sys_timeout(DNS_TMR_INTERVAL, dns_timer, NULL);
+  }
+*/
+	dns_tmr();
+	sys_timeout(DNS_TMR_INTERVAL, dns_timer, NULL);
 }
 #endif /* LWIP_DNS */
 

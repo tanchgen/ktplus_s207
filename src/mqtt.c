@@ -16,6 +16,7 @@
 
 extern volatile uint32_t LocalTime;
 
+void mqttSent( Mqtt * this );
 
 /**
  * Writes one character to an output buffer.
@@ -99,7 +100,11 @@ err_t recv_callback(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
       uint8_t *data = &mqttData[2+2+topicLen];
       uint32_t dataLen = p->tot_len - (2 + 2 + topicLen);
 
-    	switch(mqttData[0] & 0xF0)
+      *(data+dataLen) = '\0';
+
+			mqtt.connTout = LocalTime + CONN_TIMEOUT*6;
+
+			switch(mqttData[0] & 0xF0)
     	{
     		case MQTT_MSGT_PINGRESP:
     			// UARTprintf("PingResp\n");
@@ -114,6 +119,7 @@ err_t recv_callback(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
     		case MQTT_MSGT_CONACK:
     			this->connected = 1;
     			neth.netState = MQTT_CONNECTED;
+    			this->connTout = LocalTime + CONN_TIMEOUT*6;
     			break;
     		case MQTT_MSGT_SUBACK:
     			this->subs = TRUE;
@@ -148,8 +154,6 @@ err_t accept_callback(void *arg, struct tcp_pcb *npcb, err_t err) {
 
     // UARTprintf("Recieve from broker.\n");
     //UARTprintf("\r\n");
-
-	this->connected = 1;
 
 	neth.netState = TCP_CONNECTED;
 
@@ -281,7 +285,7 @@ uint8_t mqttTcpConnect(Mqtt *this) {
     tcp_err(this->pcb, conn_err);
     tcp_poll(this->pcb, http_poll, 4);
     tcp_accept(this->pcb, &accept_callback);
-
+    tcp_sent( this->pcb, mqttSent );
 
     //device_poll();
 
@@ -344,7 +348,7 @@ uint8_t mqttBrokConnect( Mqtt * this ){
   //Send MQTT identification message to broker.
   if( tcp_write(this->pcb, (void *)packet, len, 1) == ERR_OK ) {
       tcp_output(this->pcb);
-      this->lastActivity = LocalTime;
+      this->nextActivity = LocalTime + (KEEPALIVE/10 * 7);
       //this->connected = 1;
       // UARTprintf("Identificaiton message sended correctlly...\n");
   } else {
@@ -365,11 +369,12 @@ uint8_t mqttPublish(Mqtt *this, char* pub_topic, char* msg) {
 		return 1;
 	}
 
-    uint8_t var_header_pub[strlen(pub_topic)+3];
+//    uint8_t var_header_pub[strlen(pub_topic)+3];
+    uint8_t var_header_pub[strlen(pub_topic)+2];
     strcpy((char *)&var_header_pub[2], pub_topic);
     var_header_pub[0] = 0;
     var_header_pub[1] = strlen(pub_topic);
-    var_header_pub[sizeof(var_header_pub)-1] = 0;
+//    var_header_pub[sizeof(var_header_pub)-1] = 0;
 
     uint8_t fixed_header_pub[] = {MQTTPUBLISH,sizeof(var_header_pub)+strlen(msg)};
 
@@ -508,7 +513,7 @@ uint8_t mqttLive(Mqtt *this) {
 
 	uint32_t t = LocalTime;
 
-	if (t - this->lastActivity > (KEEPALIVE/10 * 7)) {
+	if (t > this->nextActivity ) {
 
 		if (this->connected) {
 			// UARTprintf("Sending keep-alive\n");
@@ -521,10 +526,16 @@ uint8_t mqttLive(Mqtt *this) {
 			neth.netState = NAME_RESOLVED;
 		}
 
-		this->lastActivity = t;
+		this->nextActivity = t + (KEEPALIVE/10 * 7);
 	}
 
   return 0;
+}
+
+void mqttSent( Mqtt * this ){
+	if( ((struct ip_addr)this->pcb->remote_ip).addr == this->server.addr ){
+		mqtt.connTout = LocalTime + CONN_TIMEOUT*6;
+	}
 }
 
 /*

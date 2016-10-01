@@ -37,6 +37,7 @@
 /* Private variables ---------------------------------------------------------*/
 //extern volatile uint32_t myTick;
 __IO uint32_t LocalTime = 0; /* this variable is used to create a time reference incremented by 10ms */
+__IO uint32_t secondFlag = 0;
 uint32_t timingdelay;
 
 //void lwip_init( void );
@@ -149,6 +150,9 @@ void genericError( tGenErr err){
 void Time_Update(void)
 {
   LocalTime += SYSTEMTICK_PERIOD_MS;
+  if(!(LocalTime % 1000) ){
+  	secondFlag = SET;
+  }
 }
 
 #ifdef  USE_FULL_ASSERT

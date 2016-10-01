@@ -47,10 +47,12 @@ struct Mqtt
 {
 	struct ip_addr server;
 	uint16_t port;
+	uint32_t connTout;
+	uint8_t connCount;
 	uint8_t connected;
 	uint8_t autoConnect;
 	struct tcp_pcb *pcb;
-	uint32_t lastActivity;
+	uint32_t nextActivity;
 	msgReceived msgReceivedCallback;
 	char deviceId[9];
 	char username[80];

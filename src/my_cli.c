@@ -108,6 +108,24 @@ void serverFound(const char *name, struct ip_addr *ipaddr, void *arg)
     neth.netState = NAME_NOT_RESOLVED;
 }
 
+void connTime( Mqtt * this ){
+	if( this->connTout < myTick ){
+		if(this->connected){
+    	mqttDisconnectForced(this);
+		}
+		else if( this->connCount-- ){
+			neth.netState = NAME_RESOLVED;
+		}
+		else {
+			neth.netState = NAME_NOT_RESOLVED;
+//			myDelay( 2000 );
+//			this->connCount = 10;
+		}
+	}
+
+}
+
+
 void cliProcess( void ) {
 
 	switch( neth.netState ) {
@@ -116,7 +134,7 @@ void cliProcess( void ) {
 			break;
 		case IP_ADDR_SET:
 		case NAME_NOT_RESOLVED:
-			neth.connCount = 10;
+			mqtt.connCount = 10;
 			dnsStart();
 			break;
 		case NAME_RESOLVED:
@@ -128,29 +146,21 @@ void cliProcess( void ) {
 				*((uint32_t *)&mqtt.server) = neth.destIp;
 				mqttTcpConnect( &mqtt );
 				neth.netState = TCP_CONNECT;
-				neth.connTout = myTick + CONN_TIMEOUT;
+				mqtt.connTout = myTick + CONN_TIMEOUT;
 			}
 			break;
 		case TCP_CONNECT:
-			if( neth.connTout < myTick ){
-				if( neth.connCount-- ){
-					neth.netState = NAME_RESOLVED;
-			    neth.connTout = myTick + CONN_TIMEOUT;
-				}
-				else {
-					neth.netState = NAME_NOT_RESOLVED;
-					myDelay( 2000 );
-					neth.connCount = 10;
-				}
-			}
-			break;
-		case MQTT_CONNECT:
+			connTime( &mqtt);
 			break;
 		case TCP_CONNECTED:
 			mqtt.subs = FALSE;
 			mqttBrokConnect( &mqtt );
 			break;
+		case MQTT_CONNECT:
+			connTime( &mqtt );
+			break;
 		case MQTT_CONNECTED:
+			connTime( &mqtt );
 			if( !mqtt.subs && (subsTout < myTick) ){
 				mqttSubscribe( &mqtt, (char *)mqtt.subsTopic );
 				subsTout = myTick + 2000;
@@ -185,7 +195,7 @@ err_t tcpConnected( void * arg, struct tcp_pcb * tpcb, err_t err ){
 
 //      neth.txLen = 0;
 //      neth.rxne = FALSE;
-      neth.netState = MQTT_CONNECTED;
+//      neth.netState = MQTT_CONNECTED;
     	eh->pcb = tpcb;
 
     	return ERR_OK;
@@ -259,8 +269,8 @@ err_t tcpRecv( void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err) {
  *            callback function!
  */
 err_t tcpSent( void *arg, struct tcp_pcb *tpcb,  u16_t len) {
-  tNeth * eh = NULL;			// Указатель на структуру клиентского Ethernet-соединения
-	eh = (tNeth *)arg;
+//  tNeth * eh = NULL;			// Указатель на структуру клиентского Ethernet-соединения
+//	eh = (tNeth *)arg;
 
  	// TODO: Функция отправки нового сообщения, если надо.
 	UNUSED(tpcb);
