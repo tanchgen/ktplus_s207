@@ -10,7 +10,7 @@
 #include "can.h"
 #include "buffer.h"
 
-uint8_t devId;
+uint32_t devId;
 extern __IO uint32_t secondFlag;
 //extern __IO uint32_t LocalTime; /* this variable is used to create a time reference incremented by 10ms */
 
@@ -21,7 +21,7 @@ void canInit(void)
 
 	RCC->APB1ENR |= RCC_APB1Periph_CAN1;
 
-#define DEV_SIGNATURE		0x1FFF7A10
+#define DEV_SIGNATURE		0x1FFF7A10+8
 	devId = (*(uint32_t *)DEV_SIGNATURE) & 0xFFFFF;
 	canBspInit();
 

@@ -5,6 +5,7 @@
  *      Author: Gennady Tanchin <g.tanchin@yandex.ru>
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -16,13 +17,14 @@
 
 //extern uint32_t s207Id;
 
-#define PARAM_NB		12
+#define PARAM_NB		14
 const struct _param {
 	uint8_t name[10];
 	uint8_t len;
 } param[PARAM_NB] = { {"NOT", 3}, {"TIME", 4}, { "COLD", 4 }, {"HOT", 3},
-						{"TEMPIN", 6}, {"TEMPOUT", 7}, {"VALVEDEG", 8}, {"FLOW", 4},
-						{"POWERSEC", 8}, {"POWERDAY", 8}, {"POWERWEEK", 9}, {"POWERMON", 8} };
+						{"TEMPIN", 6}, {"TEMPOUT", 7}, {"DELTEMP", 7}, {"VALVEDEG", 8},
+						{"FLOW", 4}, {"FLOWHOUR", 8}, {"POWERSEC", 8}, {"POWERDAY", 8},
+						{"POWERWEEK", 9}, {"POWERMON", 8} };
 
 uint8_t error[8][12] = { "ENDSW0", "ENDSW90", "VALVESENS", "VALVEMON", "TEMPINSENS", "TEMPOUTSENS",
 											"FLOW", "DEVICE" };
@@ -140,9 +142,11 @@ uint8_t mqttTopCoder( uint8_t * top, CanTxMsg * can ){
 
 	// Идентификатор устройства, передавшего сообщение - в топик
 	len = hlToStr( getDevId(can->ExtId), &ptmp );
+	/*
 	for( uint8_t i = len; i < 8; i++) {
 		*top++ = '0';
 	}
+	*/
 	memcpy( top, tmp, len);
 	top += len;
 	*top++ = '/';
@@ -169,18 +173,28 @@ uint8_t mqttTopCoder( uint8_t * top, CanTxMsg * can ){
 
 uint8_t mqttMsgCoder( uint8_t * msg, CanTxMsg *can) {
 	eMessId msgId;
-	uint8_t len;
+	uint8_t tmpMsg[20];
+	uint8_t * pTmp;
+
+	// Дабавляем таймстамп
+	timeToStr( getRtcTime(), tmpMsg);
+
+	sprintf((char *)msg, "{\"datetime\":\"%s\", \"payload\":\"", tmpMsg );
 
 	msgId = (can->ExtId & MSG_ID_MASK) >> 22;
+
 	if( (msgId == TO_IN_MSG) || (msgId == TO_OUT_MSG) ) {
 		// Теперь название и значение параметра
-		fToStr( (float)*((int16_t *)can->Data)/16, msg, 6 );
-		len = strlen( (char *)msg );
+		fToStr( (float)*((int16_t *)can->Data)/16, tmpMsg, 6 );
 	}
 	else {
-		len = ulToStr( *((uint32_t *)can->Data), &msg );
+		ulToStr( *((uint32_t *)can->Data), &pTmp );
 	}
-	return len;
+
+	strcat((char *)msg, (char *)tmpMsg);
+	strcat((char *)msg, "\"}");
+
+	return strlen((char *)msg);
 }
 
 /*
