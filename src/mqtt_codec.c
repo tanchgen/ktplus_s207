@@ -174,7 +174,7 @@ uint8_t mqttTopCoder( uint8_t * top, CanTxMsg * can ){
 uint8_t mqttMsgCoder( uint8_t * msg, CanTxMsg *can) {
 	eMessId msgId;
 	uint8_t tmpMsg[20];
-	uint8_t * pTmp;
+	uint8_t * pTmp = tmpMsg;
 
 	// Дабавляем таймстамп
 	timeToStr( getRtcTime(), tmpMsg);
