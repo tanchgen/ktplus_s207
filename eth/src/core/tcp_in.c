@@ -768,7 +768,7 @@ tcp_process(struct tcp_pcb *pcb)
     break;
   case CLOSING:
     tcp_receive(pcb);
-    if (flags & TCP_ACK && ackno == pcb->snd_nxt) {
+    if ( (flags & TCP_ACK) && (ackno == pcb->snd_nxt) ) {
       LWIP_DEBUGF(TCP_DEBUG, ("TCP connection closed: CLOSING %"U16_F" -> %"U16_F".\n", inseg.tcphdr->src, inseg.tcphdr->dest));
       tcp_pcb_purge(pcb);
       TCP_RMV_ACTIVE(pcb);
@@ -778,7 +778,7 @@ tcp_process(struct tcp_pcb *pcb)
     break;
   case LAST_ACK:
     tcp_receive(pcb);
-    if (flags & TCP_ACK && ackno == pcb->snd_nxt) {
+    if ( (flags & TCP_ACK) && (ackno == pcb->snd_nxt) ) {
       LWIP_DEBUGF(TCP_DEBUG, ("TCP connection closed: LAST_ACK %"U16_F" -> %"U16_F".\n", inseg.tcphdr->src, inseg.tcphdr->dest));
       /* bugfix #21699: don't set pcb->state to CLOSED here or we risk leaking segments */
       recv_flags |= TF_CLOSED;

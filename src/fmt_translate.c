@@ -206,7 +206,7 @@ void fToStr(float f, uint8_t r[], uint8_t maxLen) {
 				*(pr++) = i + '0';
 				len++;
 			}
-			while( *(pr-1) == '0'){
+			while( (*(pr-1) == '0') && (*(pr-2) != '.')){
 				pr--;
 			}
 		}

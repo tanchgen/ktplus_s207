@@ -45,7 +45,7 @@
 //#define SERIAL_DEBUG
 
 /* MII and RMII mode selection, for STM322xG-EVAL Board(MB786) RevB ***********/
-//#define RMII_MODE  1 // User have to provide the 50 MHz clock by soldering a 50 MHz
+#define RMII_MODE  1 // User have to provide the 50 MHz clock by soldering a 50 MHz
                      // oscillator (ref SM7745HEV-50.0M or equivalent) on the U3
                      // footprint located under CN3 and also removing jumper on JP5. 
                      // This oscillator is not provided with the board. 
@@ -53,7 +53,7 @@
                      // board User manual (UM1057).
 
                                      
-#define MII_MODE	1
+//#define MII_MODE	1
 
 /* Uncomment the define below to clock the PHY from external 25MHz crystal (only for MII mode) */
 #ifdef 	MII_MODE

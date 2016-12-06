@@ -60,7 +60,7 @@ extern uint8_t Tx_Buff[ETH_TXBUFNB][ETH_TX_BUF_SIZE];
 
 /* Global pointers to track current transmit and receive descriptors */
 extern ETH_DMADESCTypeDef  *DMATxDescToSet;
-extern ETH_DMADESCTypeDef  *DMARxDescToGet;
+//extern ETH_DMADESCTypeDef  *DMARxDescToGet;
 
 /* Global pointer for last received frame infos */
 extern ETH_DMA_Rx_Frame_infos *DMA_RX_FRAME_infos;

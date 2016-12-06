@@ -27,7 +27,7 @@ uint32_t subsTout;
 err_t cliPrevInit( void ) {
 
 	memset( &neth, 0, sizeof(neth));
-	neth.netState = TCP_CLOSED;
+	neth.netState = NET_OK;
 	neth.url = (uint8_t *)&URL;
 	neth.destPort = MQTT_PORT;
 	neth.localIp = ((LOCAL_IP0) | (LOCAL_IP1<< 8) | (LOCAL_IP2 << 16) | (LOCAL_IP3 << 24 ));

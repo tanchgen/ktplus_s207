@@ -31,7 +31,7 @@ void mqttAppMsgReceived(Mqtt *this, uint8_t *topic, uint8_t topicLen, uint8_t *d
 	msgId = mqttTopDecod( &tmpMess, topic, topicLen );
 	if (msgId && (mqttMsgDecod( &tmpMess, data, dataLen, msgId) == 1) ){
 		writeBuff( &canTxBuf, (uint8_t *)&tmpMess );
-		writeBuff( &canRxBuf, (uint8_t *)&tmpMess );
+//		writeBuff( &canRxBuf, (uint8_t *)&tmpMess );
 	}
 //	UARTprintf("Topic: %s, Data: %s", strTopic, strData);
 
