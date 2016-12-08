@@ -53,11 +53,6 @@ void rtc_Init(void)
     // Ждём, когда он заведётся
     while(!(RCC->BDCR & RCC_BDCR_LSERDY)) {
     	if( tmp < myTick ){
-        // Запускаем LSI:
-        RCC->CSR |= RCC_CSR_LSION;
-        // Ждём, когда он заведётся
-        while(!(RCC->CSR & RCC_CSR_LSIRDY))
-        {}
         lse = FALSE;
     		break;
     	}
@@ -69,7 +64,10 @@ void rtc_Init(void)
     	RCC->BDCR |= (RCC_BDCR_RTCSEL_0); // запишем 0b10
     }
     else {
-    	RCC->BDCR |= (RCC_BDCR_RTCSEL_1); // запишем 0b10
+    	// RTCCLK = HSE/25
+    	RCC->CFGR |= RCC_CFGR_RTCPRE_4 | RCC_CFGR_RTCPRE_3 | RCC_CFGR_RTCPRE_0;
+    	// Выбираем HSE
+    	RCC->BDCR |= (RCC_BDCR_RTCSEL); // запишем 0b11
     }
 
     // Включим тактирование RTC
@@ -90,15 +88,10 @@ void rtc_Init(void)
       // Часы остановлены. Режим инициализации
       // Настроим предделитель для получения частоты 1 Гц.
 
-      if (lse){
-        // LSE: нужно разделить на 0x7fff (кварцы так точно рассчитаны на это)
-        Sync = 0xff;   // 15 бит
-        Async = 0x7f;  // 7 бит
-      }
-      else {
-      // LSI:
-        Sync = 249;   // 15 бит
-        Async = 127;  // 7 бит
+      if (!lse){
+      // HSE/25 = 1MHz:
+        Async = (125-1);  // 7 бит
+        Sync = (8000-1);   // 13 бит
       }
       // Сначала записываем величину для синхронного предделителя
       RTC->PRER = Sync;
@@ -121,8 +114,8 @@ void timeInit( void ) {
   RTC_TimeTypeDef  stimestructure;
 
   rtc_Init();
-  /*##-1- Configure the Date #################################################*/
-  /* Set Date: Tuesday February 18th 2014 */
+  //##-1- Configure the Date #################################################
+  // Set Date
   sdatestructure.RTC_Year = 16;
   sdatestructure.RTC_Month = RTC_Month_June;
   sdatestructure.RTC_Date = 1;
@@ -130,7 +123,7 @@ void timeInit( void ) {
 
   if(RTC_SetDate( RTC_Format_BIN ,&sdatestructure ) != SUCCESS)
   {
-    /* Initialization Error */
+    // Initialization Error
     genericError( GEN_ERR_HW );
   }
 
@@ -140,7 +133,7 @@ void timeInit( void ) {
 
   if(RTC_SetTime( rtcInitStruct.RTC_HourFormat ,&stimestructure ) != SUCCESS)
   {
-    /* Initialization Error */
+    // Initialization Error
     genericError( GEN_ERR_HW );
   }
 
