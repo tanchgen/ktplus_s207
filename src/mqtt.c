@@ -79,10 +79,10 @@ int mqttPacket_encode(unsigned char* buf, int length)
 	return rc;
 }
 
-
 err_t recv_callback(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
     //UARTprintf("TCP callback from %d.%d.%d.%d\r\n", ip4_addr1(&(pcb->remote_ip)),ip4_addr2(&(pcb->remote_ip)),ip4_addr3(&(pcb->remote_ip)),ip4_addr4(&(pcb->remote_ip)));
-    uint8_t *mqttData;
+	uint32_t tmpTime;
+	uint8_t *mqttData;
 
     Mqtt *this = arg;
 
@@ -103,6 +103,8 @@ err_t recv_callback(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
       *(data+dataLen) = '\0';
 
 			mqtt.connTout = LocalTime + CONN_TIMEOUT*6;
+			tmpTime = this->nextActivity;
+			this->nextActivity = LocalTime + (KEEPALIVE/10 * 7);
 
 			switch(mqttData[0] & 0xF0)
     	{
@@ -127,7 +129,8 @@ err_t recv_callback(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
     		case MQTT_MSGT_PUBACK:
     			this->pubFree = TRUE;
     			break;
-//    		default:
+    		default:
+    			this->nextActivity = tmpTime;
 //    			UARTprintf("default:\n");
     	}
 
@@ -371,7 +374,7 @@ uint8_t mqttPublish(Mqtt *this, char* pub_topic, char* msg) {
 //    uint8_t var_header_pub[strlen(pub_topic)+3];
     uint8_t var_header_pub[strlen(pub_topic)+2];
     strcpy((char *)&var_header_pub[2], pub_topic);
-    var_header_pub[0] = 0;
+    var_header_pub[0] = QOS1;
     var_header_pub[1] = strlen(pub_topic);
 //    var_header_pub[sizeof(var_header_pub)-1] = 0;
 
@@ -458,7 +461,7 @@ uint8_t mqttSubscribe(Mqtt *this, char* topic) {
 
     writeCString( &pSubs, topic );
 
-    *(pSubs++) = QOS0;
+    *(pSubs++) = QOS1;
 
     len = pSubs - subsPacket;
 
@@ -524,8 +527,7 @@ uint8_t mqttLive(Mqtt *this) {
 		else {
 			neth.netState = NAME_RESOLVED;
 		}
-
-		this->nextActivity = t + (KEEPALIVE/10 * 7);
+		this->nextActivity  +=  (KEEPALIVE/10 * 7);
 	}
 
   return 0;
@@ -540,13 +542,3 @@ err_t mqttSent( void * arg ,  struct tcp_pcb *tpcb, u16_t len){
 	}
 	return ERR_OK;
 }
-
-/*
-int PubSub_mbed::connected() {
-int rc = 0;(int)socket.connected();
-if (!rc) {
-socket.close();
-}
-return rc;
-}
-*/

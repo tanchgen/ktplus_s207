@@ -109,7 +109,6 @@ void rtc_Init(void)
 
 // *********** Инициализация структуры ВРЕМЯ (сейчас - системное ) ************
 void timeInit( void ) {
-	RTC_InitTypeDef rtcInitStruct;
   RTC_DateTypeDef  sdatestructure;
   RTC_TimeTypeDef  stimestructure;
 
@@ -131,7 +130,7 @@ void timeInit( void ) {
   stimestructure.RTC_Minutes = 0;
   stimestructure.RTC_Seconds = 0;
 
-  if(RTC_SetTime( rtcInitStruct.RTC_HourFormat ,&stimestructure ) != SUCCESS)
+  if(RTC_SetTime( RTC_HourFormat_24 ,&stimestructure ) != SUCCESS)
   {
     // Initialization Error
     genericError( GEN_ERR_HW );

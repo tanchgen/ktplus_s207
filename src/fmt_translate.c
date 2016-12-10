@@ -134,7 +134,7 @@ void timeToStr( time_t ut, uint8_t *str ) {
 
 
 	// Заносим Год
-	year = d.RTC_Year +1900;
+	year = d.RTC_Year +2000;
 	ulToStr( year, &str);
 	*str++ = ' ';
 

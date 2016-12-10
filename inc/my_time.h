@@ -12,8 +12,16 @@
 #include "stm32f2xx.h"
 #include <time.h>
 
+#include "can.h"
 
 #define TIMEZONE_MSK			(+3)
+
+#define SNTP_SET_SYSTEM_TIME(sec)  	\
+	do {															\
+		sec += (TIMEZONE_MSK*3600);			\
+		setRtcTime(sec);								\
+		canSendMsg( TIME, ADJ, sec ); 	\
+	} while (0);
 
 	// DEF: standard signed format
 	// UNDEF: non-standard unsigned format

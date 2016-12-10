@@ -17,15 +17,12 @@
 
 //extern uint32_t s207Id;
 
-#define PARAM_NB		17
+#define PARAM_NB		15
 const struct _param {
 	uint8_t name[10];
 	uint8_t len;
 } param[PARAM_NB] = {
 						{"NOT", 3},
-						{"TIME", 4},
-						{"COLD", 4},
-						{"HOT", 3},
 						{"TEMPIN", 6},
 						{"TEMPOUT", 7},
 						{"DELTEMP", 7},
@@ -38,7 +35,8 @@ const struct _param {
 						{"POWERMON", 8},
 						{"VALVEID", 7},
 						{"IMPTOTAL", 8},
-						{"IMPEXEC", 7}
+						{"IMPEXEC", 7},
+						{"TIME", 4}
 };
 
 uint8_t error[8][12] = { "ENDSW0", "ENDSW90", "VALVESENS", "VALVEMON", "TEMPINSENS", "TEMPOUTSENS",
@@ -165,7 +163,7 @@ uint8_t mqttMsgCoder( uint8_t * msg, CanTxMsg *can) {
 
 	tmptm = *((uint32_t*)can->Data);
 	// Дабавляем таймстамп
-	timeToStr( uxTime, tmpMsg);
+	timeToStr( tmptm, tmpMsg);
 
 	sprintf((char *)msg, "{\"datetime\":\"%s\", \"payload\":\"", tmpMsg );
 

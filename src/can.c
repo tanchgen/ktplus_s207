@@ -41,7 +41,11 @@ void canInit(void)
 
 	canFilterInit();
 
-	CAN_ITConfig(CAN_CAN, CAN_IT_FMP0 | CAN_IT_FMP1 | CAN_IT_TME | CAN_IT_ERR | CAN_IT_BOF, ENABLE);
+	CAN_ITConfig(CAN_CAN, CAN_IT_FMP0, ENABLE);
+	CAN_ITConfig(CAN_CAN, CAN_IT_FMP1, ENABLE);
+	CAN_ITConfig(CAN_CAN, CAN_IT_TME, ENABLE);
+	CAN_ITConfig(CAN_CAN, CAN_IT_ERR, ENABLE);
+	CAN_ITConfig(CAN_CAN, CAN_IT_BOF, ENABLE);
 	CAN_NVIC_InitStruct.NVIC_IRQChannel = CAN1_RX0_IRQn;
 	CAN_NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 5;
 	CAN_NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;
