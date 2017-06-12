@@ -44,7 +44,7 @@ C_DEPS += \
 src/%.o: ../src/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross ARM C Compiler'
-	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -Og -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -ffreestanding -fno-move-loop-invariants -Wall -Wextra  -g3 -DDEBUG -DTRACE -DOS_USE_TRACE_SEMIHOSTING_STDOUT -DSTM32F2XX -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=25000000 -DRTL8201=1 -DCAN_TEST=0 -I"/home/jet/work/thermo/inc" -I"/home/jet/work/thermo/system/inc/cmsis" -I"/home/jet/work/thermo/system/inc/stm32f2-stdperiph" -I"/home/jet/work/thermo/eth/inc" -I/home/jet/work/thermo/eth/inc/ipv4 -I"/home/jet/work/thermo/system/inc" -std=gnu11 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -Og -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -ffreestanding -fno-move-loop-invariants -Wall -Wextra  -g3 -DDEBUG -DTRACE -DOS_USE_TRACE_SEMIHOSTING_STDOUT -DSTM32F2XX -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=25000000 -DRTL8201=1 -DCAN_TEST=0 -I"/home/jet/work/kt-plus/thermo/inc" -I"/home/jet/work/kt-plus/thermo/system/inc/cmsis" -I"/home/jet/work/kt-plus/thermo/system/inc/stm32f2-stdperiph" -I"/home/jet/work/kt-plus/thermo/eth/inc" -I"/home/jet/work/kt-plus/thermo/system/inc" -I"/home/jet/work/kt-plus/thermo/eth/inc/ipv4" -std=gnu11 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
