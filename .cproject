@@ -48,9 +48,7 @@
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.847744284" name="Cross ARM GNU Assembler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor.1178524932" name="Use preprocessor" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor" value="true" valueType="boolean"/>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths.1403744282" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/home/jet/work/thermo/inc"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/system/inc/cmsis&quot;"/>
-									<listOptionValue builtIn="false" value="/home/jet/work/thermo/system/inc/stm32f2-stdperiph"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/eth/inc&quot;"/>
 									<listOptionValue builtIn="false" value="../eth/inc/ipv4"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/system/inc&quot;"/>
@@ -91,8 +89,6 @@
 							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.577315797" name="Cross ARM C++ Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.include.paths.1354259825" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="/home/jet/work/thermo/inc"/>
-									<listOptionValue builtIn="false" value="/home/jet/work/thermo/system/inc/stm32f2-stdperiph"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/eth/inc&quot;"/>
 									<listOptionValue builtIn="false" value="../eth/inc/ipv4"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/system/inc&quot;"/>
